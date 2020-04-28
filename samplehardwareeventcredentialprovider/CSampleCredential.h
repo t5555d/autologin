@@ -19,7 +19,6 @@
 #include "common.h"
 #include "dll.h"
 #include "resource.h"
-#include "CommandWindow.h"
 
 class CSampleCredential : public ICredentialProviderCredential
 {
