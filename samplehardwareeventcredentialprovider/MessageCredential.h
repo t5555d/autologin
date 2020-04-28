@@ -16,7 +16,6 @@
 #include "helpers.h"
 #include "common.h"
 #include "dll.h"
-#include "resource.h"
 
 class CMessageCredential : public ICredentialProviderCredential
 {

@@ -190,34 +190,6 @@ HRESULT CSampleCredential::GetStringValue(
     return hr;
 }
 
-// Get the image to show in the user tile.
-HRESULT CSampleCredential::GetBitmapValue(
-    __in DWORD dwFieldID, 
-    __out HBITMAP* phbmp
-    )
-{
-    HRESULT hr;
-    if ((SFI_TILEIMAGE == dwFieldID) && phbmp)
-    {
-        HBITMAP hbmp = LoadBitmap(HINST_THISDLL, MAKEINTRESOURCE(IDB_TILE_IMAGE));
-        if (hbmp != NULL)
-        {
-            hr = S_OK;
-            *phbmp = hbmp;
-        }
-        else
-        {
-            hr = HRESULT_FROM_WIN32(GetLastError());
-        }
-    }
-    else
-    {
-        hr = E_INVALIDARG;
-    }
-
-    return hr;
-}
-
 // Sets pdwAdjacentTo to the index of the field the submit button should be 
 // adjacent to. We recommend that the submit button is placed next to the last
 // field which the user is required to enter information in. Optional fields

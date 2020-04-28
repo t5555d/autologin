@@ -18,7 +18,6 @@
 #include <helpers.h>
 #include "common.h"
 #include "dll.h"
-#include "resource.h"
 
 class CSampleCredential : public ICredentialProviderCredential
 {
@@ -61,7 +60,7 @@ class CSampleCredential : public ICredentialProviderCredential
                                  __out CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis);
 
     IFACEMETHODIMP GetStringValue(__in DWORD dwFieldID, __deref_out PWSTR* ppwsz);
-    IFACEMETHODIMP GetBitmapValue(__in DWORD dwFieldID, __out HBITMAP* phbmp);
+    IFACEMETHODIMP GetBitmapValue(__in DWORD, __out HBITMAP*) { return E_NOTIMPL; }
     IFACEMETHODIMP GetCheckboxValue(__in DWORD dwFieldID, __out BOOL* pbChecked, __deref_out PWSTR* ppwszLabel);
     IFACEMETHODIMP GetComboBoxValueCount(__in DWORD dwFieldID, __out DWORD* pcItems, __out_range(<,*pcItems) DWORD* pdwSelectedItem);
     IFACEMETHODIMP GetComboBoxValueAt(__in DWORD dwFieldID, __in DWORD dwItem, __deref_out PWSTR* ppwszItem);
