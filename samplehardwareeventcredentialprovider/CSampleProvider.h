@@ -13,13 +13,12 @@
 #include <windows.h>
 #include <strsafe.h>
 
-#include "CommandWindow.h"
 #include "CSampleCredential.h"
 #include "MessageCredential.h"
 #include "helpers.h"
+#include "RDPState.h"
 
 // Forward references for classes used here.
-class CCommandWindow;
 class CSampleCredential;
 class CMessageCredential;
 
@@ -70,16 +69,19 @@ class CSampleProvider : public ICredentialProvider
 
     friend HRESULT CSample_CreateInstance(__in REFIID riid, __deref_out void** ppv);
 
-public:
     void OnConnectStatusChanged();
+protected:
 
-  protected:
     CSampleProvider();
     __override ~CSampleProvider();
-    
+
+    static void OnConnectStatusChanged(CSampleProvider *self) {
+        self->OnConnectStatusChanged();
+    }
+
 private:
-    CCommandWindow              *_pCommandWindow;       // Emulates external events.
     LONG                        _cRef;                  // Reference counter.
+    RDPState                    _rdpState;
     CSampleCredential           *_pCredential;          // Our "connected" credential.
     CMessageCredential          *_pMessageCredential;   // Our "disconnected" credential.
     ICredentialProviderEvents   *_pcpe;                    // Used to tell our owner to re-enumerate credentials.

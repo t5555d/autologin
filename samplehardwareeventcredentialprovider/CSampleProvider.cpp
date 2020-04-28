@@ -18,7 +18,7 @@
 
 #include <credentialprovider.h>
 #include "CSampleCredential.h"
-#include "CommandWindow.h"
+#include "CSampleProvider.h"
 #include "guid.h"
 
 // CSampleProvider ////////////////////////////////////////////////////////
@@ -29,7 +29,6 @@ CSampleProvider::CSampleProvider():
     DllAddRef();
 
     _pcpe = NULL;
-    _pCommandWindow = NULL;
     _pCredential = NULL;
     _pMessageCredential = NULL;
 }
@@ -40,11 +39,6 @@ CSampleProvider::~CSampleProvider()
     {
         _pCredential->Release();
         _pCredential = NULL;
-    }
-
-    if (_pCommandWindow != NULL)
-    {
-        delete _pCommandWindow;
     }
 
     DllRelease();
@@ -85,7 +79,7 @@ HRESULT CSampleProvider::SetUsageScenario(
         // but there's no point in recreating our creds, since they're the same all the
         // time
         
-        if (!_pCredential && !_pMessageCredential && !_pCommandWindow)
+        if (!_pCredential && !_pMessageCredential)
         {
             // For the locked case, a more advanced credprov might only enumerate tiles for the 
             // user whose owns the locked session, since those are the only creds that will work
@@ -95,27 +89,10 @@ HRESULT CSampleProvider::SetUsageScenario(
                 _pMessageCredential = new CMessageCredential();
                 if (_pMessageCredential)
                 {
-                    _pCommandWindow = new CCommandWindow();
-                    if (_pCommandWindow != NULL)
+                    hr = _pCredential->Initialize(_cpus, s_rgCredProvFieldDescriptors, s_rgFieldStatePairs);
+                    if (SUCCEEDED(hr))
                     {
-                        // Initialize each of the object we've just created. 
-                        // - The CCommandWindow needs a pointer to us so it can let us know 
-                        // when to re-enumerate credentials.
-                        // - The CSampleCredential needs field descriptors.
-                        // - The CMessageCredential needs field descriptors and a message.
-                        hr = _pCommandWindow->Initialize(this);
-                        if (SUCCEEDED(hr))
-                        {
-                            hr = _pCredential->Initialize(_cpus, s_rgCredProvFieldDescriptors, s_rgFieldStatePairs);
-                            if (SUCCEEDED(hr))
-                            {
-                                hr = _pMessageCredential->Initialize(s_rgMessageCredProvFieldDescriptors, s_rgMessageFieldStatePairs, L"Please connect");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        hr = E_OUTOFMEMORY;
+                        hr = _pMessageCredential->Initialize(s_rgMessageCredProvFieldDescriptors, s_rgMessageFieldStatePairs, L"Please connect");
                     }
                 }
                 else
@@ -127,14 +104,15 @@ HRESULT CSampleProvider::SetUsageScenario(
             {
                 hr = E_OUTOFMEMORY;
             }
+
+            if (SUCCEEDED(hr)) {
+                _rdpState.set_callback(OnConnectStatusChanged, this);
+                _rdpState.start();
+            }
+
             // If anything failed, clean up.
             if (FAILED(hr))
             {
-                if (_pCommandWindow != NULL)
-                {
-                    delete _pCommandWindow;
-                    _pCommandWindow = NULL;
-                }
                 if (_pCredential != NULL)
                 {
                     _pCredential->Release();
@@ -229,7 +207,7 @@ HRESULT CSampleProvider::GetFieldDescriptorCount(
     __out DWORD* pdwCount
     )
 {
-    if (_pCommandWindow->GetConnectedStatus())
+    if (!_rdpState.is_rdp_active())
     {
         *pdwCount = SFI_NUM_FIELDS;
     }
@@ -250,7 +228,7 @@ HRESULT CSampleProvider::GetFieldDescriptorAt(
 {    
     HRESULT hr;
 
-    if (_pCommandWindow->GetConnectedStatus())
+    if (!_rdpState.is_rdp_active())
     {
         // Verify dwIndex is a valid field.
         if ((dwIndex < SFI_NUM_FIELDS) && ppcpfd)
@@ -307,7 +285,7 @@ HRESULT CSampleProvider::GetCredentialAt(
     // Make sure the parameters are valid.
     if ((dwIndex == 0) && ppcpc)
     {
-        if (_pCommandWindow->GetConnectedStatus())
+        if (!_rdpState.is_rdp_active())
         {
             hr = _pCredential->QueryInterface(IID_ICredentialProviderCredential, reinterpret_cast<void**>(ppcpc));
         }
