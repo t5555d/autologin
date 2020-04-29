@@ -60,16 +60,6 @@ class CSampleCredential : public ICredentialProviderCredential
                                  __out CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis);
 
     IFACEMETHODIMP GetStringValue(__in DWORD dwFieldID, __deref_out PWSTR* ppwsz);
-    IFACEMETHODIMP GetBitmapValue(__in DWORD, __out HBITMAP*) { return E_NOTIMPL; }
-    IFACEMETHODIMP GetCheckboxValue(__in DWORD dwFieldID, __out BOOL* pbChecked, __deref_out PWSTR* ppwszLabel);
-    IFACEMETHODIMP GetComboBoxValueCount(__in DWORD dwFieldID, __out DWORD* pcItems, __out_range(<,*pcItems) DWORD* pdwSelectedItem);
-    IFACEMETHODIMP GetComboBoxValueAt(__in DWORD dwFieldID, __in DWORD dwItem, __deref_out PWSTR* ppwszItem);
-    IFACEMETHODIMP GetSubmitButtonValue(__in DWORD dwFieldID, __out DWORD* pdwAdjacentTo);
-
-    IFACEMETHODIMP SetStringValue(__in DWORD dwFieldID, __in PCWSTR pwz);
-    IFACEMETHODIMP SetCheckboxValue(__in DWORD dwFieldID, __in BOOL bChecked);
-    IFACEMETHODIMP SetComboBoxSelectedValue(__in DWORD dwFieldID, __in DWORD dwSelectedItem);
-    IFACEMETHODIMP CommandLinkClicked(__in DWORD dwFieldID);
 
     IFACEMETHODIMP GetSerialization(__out CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr, 
                                     __out CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION* pcpcs, 
@@ -79,6 +69,18 @@ class CSampleCredential : public ICredentialProviderCredential
                                 __in NTSTATUS ntsSubstatus,
                                 __deref_out_opt PWSTR* ppwszOptionalStatusText, 
                                 __out CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon);
+
+  public: // unused methods : not required, since this control doesn't have such fields
+
+    IFACEMETHODIMP GetBitmapValue(DWORD, HBITMAP*) { return E_NOTIMPL; }
+    IFACEMETHODIMP GetCheckboxValue(DWORD, BOOL*, PWSTR*) { return E_NOTIMPL; }
+    IFACEMETHODIMP GetComboBoxValueCount(DWORD, DWORD*, DWORD*) { return E_NOTIMPL; }
+    IFACEMETHODIMP GetComboBoxValueAt(DWORD, DWORD, PWSTR*) { return E_NOTIMPL; }
+    IFACEMETHODIMP GetSubmitButtonValue(DWORD, DWORD*) { return E_NOTIMPL; }
+    IFACEMETHODIMP SetStringValue(DWORD, PCWSTR) { return E_NOTIMPL; }
+    IFACEMETHODIMP SetCheckboxValue(DWORD, BOOL) { return E_NOTIMPL; }
+    IFACEMETHODIMP SetComboBoxSelectedValue(DWORD, DWORD) { return E_NOTIMPL; }
+    IFACEMETHODIMP CommandLinkClicked(DWORD) { return E_NOTIMPL; }
 
   public:
     HRESULT Initialize(__in CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus,

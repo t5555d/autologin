@@ -45,40 +45,43 @@ class CMessageCredential : public ICredentialProviderCredential
         };
         return QISearch(this, qit, riid, ppv);
     }
-  public:
-    // ICredentialProviderCredential
-    IFACEMETHODIMP Advise(__in ICredentialProviderCredentialEvents* pcpce);
-    IFACEMETHODIMP UnAdvise();
 
-    IFACEMETHODIMP SetSelected(__out BOOL* pbAutoLogon);
-    IFACEMETHODIMP SetDeselected();
+public: // ICredentialProviderCredential
 
     IFACEMETHODIMP GetFieldState(__in DWORD dwFieldID,
-                                 __out CREDENTIAL_PROVIDER_FIELD_STATE* pcpfs,
-                                 __out CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis);
+        __out CREDENTIAL_PROVIDER_FIELD_STATE* pcpfs,
+        __out CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis);
 
     IFACEMETHODIMP GetStringValue(__in DWORD dwFieldID, __deref_out PWSTR* ppwsz);
-    IFACEMETHODIMP GetBitmapValue(__in DWORD dwFieldID, __out HBITMAP* phbmp);
-    IFACEMETHODIMP GetCheckboxValue(__in DWORD dwFieldID, __out BOOL* pbChecked, __deref_out PWSTR* ppwszLabel);
-    IFACEMETHODIMP GetComboBoxValueCount(__in DWORD dwFieldID, __out DWORD* pcItems, __out_range(<,*pcItems) DWORD* pdwSelectedItem);
-    IFACEMETHODIMP GetComboBoxValueAt(__in DWORD dwFieldID, __in DWORD dwItem, __deref_out PWSTR* ppwszItem);
-    IFACEMETHODIMP GetSubmitButtonValue(__in DWORD dwFieldID, __out DWORD* pdwAdjacentTo);
 
-    IFACEMETHODIMP SetStringValue(__in DWORD dwFieldID, __in PCWSTR pwz);
-    IFACEMETHODIMP SetCheckboxValue(__in DWORD dwFieldID, __in BOOL bChecked);
-    IFACEMETHODIMP SetComboBoxSelectedValue(__in DWORD dwFieldID, __in DWORD dwSelectedItem);
-    IFACEMETHODIMP CommandLinkClicked(__in DWORD dwFieldID);
+public: // ICredentialProviderCredential unused methods
 
-    IFACEMETHODIMP GetSerialization(__out CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr, 
-                                    __out CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION* pcpcs, 
-                                    __deref_out_opt PWSTR* ppwszOptionalStatusText, 
-                                    __out CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon);
-    IFACEMETHODIMP ReportResult(__in NTSTATUS ntsStatus, 
-                                __in NTSTATUS ntsSubstatus,
-                                __deref_out_opt PWSTR* ppwszOptionalStatusText, 
-                                __out CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon);
+    IFACEMETHODIMP Advise(ICredentialProviderCredentialEvents*) { return E_NOTIMPL; }
+    IFACEMETHODIMP UnAdvise() { return E_NOTIMPL; }
 
-  public:
+    IFACEMETHODIMP SetSelected(BOOL*) { return S_FALSE; }
+    IFACEMETHODIMP SetDeselected() { return S_OK; }
+
+    IFACEMETHODIMP GetSerialization(CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE*, 
+                                    CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION*, 
+                                    PWSTR*, CREDENTIAL_PROVIDER_STATUS_ICON*) { return E_NOTIMPL; }
+    IFACEMETHODIMP ReportResult(NTSTATUS, NTSTATUS, PWSTR*, 
+        CREDENTIAL_PROVIDER_STATUS_ICON*) { return E_NOTIMPL; }
+
+public: // ICredentialProviderCredential unused methods
+        // not required, since our tile doesn't have such fields
+
+    IFACEMETHODIMP GetBitmapValue(DWORD, HBITMAP*) { return E_NOTIMPL; }
+    IFACEMETHODIMP GetCheckboxValue(DWORD, BOOL*, PWSTR*) { return E_NOTIMPL; }
+    IFACEMETHODIMP GetComboBoxValueCount(DWORD, DWORD*, DWORD*) { return E_NOTIMPL; }
+    IFACEMETHODIMP GetComboBoxValueAt(DWORD, DWORD, PWSTR*) { return E_NOTIMPL; }
+    IFACEMETHODIMP GetSubmitButtonValue(DWORD, DWORD*) { return E_NOTIMPL; }
+    IFACEMETHODIMP SetStringValue(DWORD, PCWSTR) { return E_NOTIMPL; }
+    IFACEMETHODIMP SetCheckboxValue(DWORD, BOOL) { return E_NOTIMPL; }
+    IFACEMETHODIMP SetComboBoxSelectedValue(DWORD, DWORD) { return E_NOTIMPL; }
+    IFACEMETHODIMP CommandLinkClicked(DWORD) { return E_NOTIMPL; }
+
+public:
     HRESULT Initialize(__in const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* rgcpfd,
                        __in const FIELD_STATE_PAIR* rgfsp);
 

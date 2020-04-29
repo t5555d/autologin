@@ -75,10 +75,6 @@ HRESULT CSampleCredential::Initialize(
     {
         hr = SHStrDupW(L"Test1234", &_rgFieldStrings[SFI_PASSWORD]);
     }
-    if (SUCCEEDED(hr))
-    {
-        hr = SHStrDupW(L"Submit", &_rgFieldStrings[SFI_SUBMIT_BUTTON]);
-    }
 
     return S_OK;
 }
@@ -189,126 +185,6 @@ HRESULT CSampleCredential::GetStringValue(
 
     return hr;
 }
-
-// Sets pdwAdjacentTo to the index of the field the submit button should be 
-// adjacent to. We recommend that the submit button is placed next to the last
-// field which the user is required to enter information in. Optional fields
-// should be below the submit button.
-HRESULT CSampleCredential::GetSubmitButtonValue(
-    __in DWORD dwFieldID,
-    __out DWORD* pdwAdjacentTo
-    )
-{
-    HRESULT hr;
-
-    if (SFI_SUBMIT_BUTTON == dwFieldID && pdwAdjacentTo)
-    {
-        // pdwAdjacentTo is a pointer to the fieldID you want the submit button to 
-        // appear next to.
-        *pdwAdjacentTo = SFI_PASSWORD;
-        hr = S_OK;
-    }
-    else
-    {
-        hr = E_INVALIDARG;
-    }
-    return hr;
-}
-
-// Sets the value of a field which can accept a string as a value.
-// This is called on each keystroke when a user types into an edit field
-HRESULT CSampleCredential::SetStringValue(
-    __in DWORD dwFieldID, 
-    __in PCWSTR pwz      
-    )
-{
-    HRESULT hr;
-
-    if (dwFieldID < ARRAYSIZE(_rgCredProvFieldDescriptors) && 
-       (CPFT_EDIT_TEXT == _rgCredProvFieldDescriptors[dwFieldID].cpft || 
-        CPFT_PASSWORD_TEXT == _rgCredProvFieldDescriptors[dwFieldID].cpft)) 
-    {
-        PWSTR* ppwszStored = &_rgFieldStrings[dwFieldID];
-        CoTaskMemFree(*ppwszStored);
-
-        hr = SHStrDupW(pwz, ppwszStored);
-    }
-    else
-    {
-        hr = E_INVALIDARG;
-    }
-
-    return hr;
-}
-
-//------------- 
-// The following methods are for logonUI to get the values of various UI elements and then communicate
-// to the credential about what the user did in that field.  However, these methods are not implemented
-// because our tile doesn't contain these types of UI elements
-HRESULT CSampleCredential::GetCheckboxValue(
-    __in DWORD dwFieldID, 
-    __out BOOL* pbChecked,
-    __deref_out PWSTR* ppwszLabel
-    )
-{
-    UNREFERENCED_PARAMETER(dwFieldID);
-    UNREFERENCED_PARAMETER(pbChecked);
-    UNREFERENCED_PARAMETER(ppwszLabel);
-
-    return E_NOTIMPL;
-}
-
-HRESULT CSampleCredential::GetComboBoxValueCount(
-    __in DWORD dwFieldID, 
-    __out DWORD* pcItems, 
-    __out_range(<,*pcItems) DWORD* pdwSelectedItem
-    )
-{
-    UNREFERENCED_PARAMETER(dwFieldID);
-    UNREFERENCED_PARAMETER(pcItems);
-    UNREFERENCED_PARAMETER(pdwSelectedItem);
-    return E_NOTIMPL;
-}
-
-HRESULT CSampleCredential::GetComboBoxValueAt(
-    __in DWORD dwFieldID, 
-    __in DWORD dwItem,
-    __deref_out PWSTR* ppwszItem
-    )
-{
-    UNREFERENCED_PARAMETER(dwFieldID);
-    UNREFERENCED_PARAMETER(dwItem);
-    UNREFERENCED_PARAMETER(ppwszItem);
-    return E_NOTIMPL;
-}
-
-HRESULT CSampleCredential::SetCheckboxValue(
-    __in DWORD dwFieldID, 
-    __in BOOL bChecked
-    )
-{
-    UNREFERENCED_PARAMETER(dwFieldID);
-    UNREFERENCED_PARAMETER(bChecked);
-
-    return E_NOTIMPL;
-}
-
-HRESULT CSampleCredential::SetComboBoxSelectedValue(
-    __in DWORD dwFieldId,
-    __in DWORD dwSelectedItem
-    )
-{
-    UNREFERENCED_PARAMETER(dwFieldId);
-    UNREFERENCED_PARAMETER(dwSelectedItem);
-    return E_NOTIMPL;
-}
-
-HRESULT CSampleCredential::CommandLinkClicked(__in DWORD dwFieldID)
-{
-    UNREFERENCED_PARAMETER(dwFieldID);
-    return E_NOTIMPL;
-}
-//------ end of methods for controls we don't have in our tile ----//
 
 // Collect the username and password into a serialized credential for the correct usage scenario 
 // (logon/unlock is what's demonstrated in this sample).  LogonUI then passes these credentials 
@@ -424,15 +300,6 @@ HRESULT CSampleCredential::ReportResult(
         if (SUCCEEDED(SHStrDupW(s_rgLogonStatusInfo[dwStatusInfo].pwzMessage, ppwszOptionalStatusText)))
         {
             *pcpsiOptionalStatusIcon = s_rgLogonStatusInfo[dwStatusInfo].cpsi;
-        }
-    }
-
-    // If we failed the logon, try to erase the password field.
-    if (!SUCCEEDED(HRESULT_FROM_NT(ntsStatus)))
-    {
-        if (_pCredProvCredentialEvents)
-        {
-            _pCredProvCredentialEvents->SetFieldString(this, SFI_PASSWORD, L"");
         }
     }
 
