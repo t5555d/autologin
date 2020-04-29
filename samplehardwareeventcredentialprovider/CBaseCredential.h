@@ -2,6 +2,8 @@
 
 #include "common.h"
 #include "dll.h"
+#include "fields.h"
+#include <vector>
 #include <shlwapi.h>
 
 #define NOT_IMPLEMENTED override { return E_NOTIMPL; }
@@ -43,25 +45,39 @@ public: // IUnknown
 
 public: // ICredentialProviderCredential default implementation for all field-related methods
 
-    IFACEMETHODIMP GetStringValue(DWORD, PWSTR*) NOT_IMPLEMENTED;
-    IFACEMETHODIMP GetBitmapValue(DWORD, HBITMAP*) NOT_IMPLEMENTED;
-    IFACEMETHODIMP GetCheckboxValue(DWORD, BOOL*, PWSTR*) NOT_IMPLEMENTED;
-    IFACEMETHODIMP GetComboBoxValueCount(DWORD, DWORD*, DWORD*) NOT_IMPLEMENTED;
-    IFACEMETHODIMP GetComboBoxValueAt(DWORD, DWORD, PWSTR*) NOT_IMPLEMENTED;
-    IFACEMETHODIMP GetSubmitButtonValue(DWORD, DWORD*) NOT_IMPLEMENTED;
-    IFACEMETHODIMP SetStringValue(DWORD, PCWSTR) NOT_IMPLEMENTED;
-    IFACEMETHODIMP SetCheckboxValue(DWORD, BOOL) NOT_IMPLEMENTED;
-    IFACEMETHODIMP SetComboBoxSelectedValue(DWORD, DWORD) NOT_IMPLEMENTED;
-    IFACEMETHODIMP CommandLinkClicked(DWORD) NOT_IMPLEMENTED;
+    HRESULT GetFieldState(DWORD dwFieldID,
+        CREDENTIAL_PROVIDER_FIELD_STATE* pcpfs,
+        CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis) override;
+
+    HRESULT GetStringValue(DWORD, PWSTR*) override;
+    HRESULT SetStringValue(DWORD, PCWSTR) override;
+
+    HRESULT FormatStringValue(DWORD dwFieldId, PCWSTR fmt, ...);
+
+    HRESULT GetBitmapValue(DWORD, HBITMAP*) NOT_IMPLEMENTED;
+    HRESULT GetCheckboxValue(DWORD, BOOL*, PWSTR*) NOT_IMPLEMENTED;
+    HRESULT GetComboBoxValueCount(DWORD, DWORD*, DWORD*) NOT_IMPLEMENTED;
+    HRESULT GetComboBoxValueAt(DWORD, DWORD, PWSTR*) NOT_IMPLEMENTED;
+    HRESULT GetSubmitButtonValue(DWORD, DWORD*) NOT_IMPLEMENTED;
+    HRESULT SetCheckboxValue(DWORD, BOOL) NOT_IMPLEMENTED;
+    HRESULT SetComboBoxSelectedValue(DWORD, DWORD) NOT_IMPLEMENTED;
+    HRESULT CommandLinkClicked(DWORD) NOT_IMPLEMENTED;
 
 public: // ICredentialProviderCredential default implementation for other optional methods
 
-    IFACEMETHODIMP Advise(ICredentialProviderCredentialEvents*) NOT_IMPLEMENTED;
-    IFACEMETHODIMP UnAdvise() NOT_IMPLEMENTED;
+    HRESULT Advise(ICredentialProviderCredentialEvents*) NOT_IMPLEMENTED;
+    HRESULT UnAdvise() NOT_IMPLEMENTED;
 
-    IFACEMETHODIMP SetSelected(BOOL*) { return S_FALSE; }
-    IFACEMETHODIMP SetDeselected() { return S_OK; }
+    HRESULT SetSelected(BOOL*) { return S_FALSE; }
+    HRESULT SetDeselected() { return S_OK; }
 
-    IFACEMETHODIMP ReportResult(NTSTATUS, NTSTATUS, PWSTR*,
+    HRESULT ReportResult(NTSTATUS, NTSTATUS, PWSTR*,
         CREDENTIAL_PROVIDER_STATUS_ICON*) NOT_IMPLEMENTED;
+
+public:
+
+    HRESULT GetFieldDescriptorAt(DWORD dwIndex, CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc);
+
+protected:
+    std::vector<Field *> m_fields{ 10 };
 };

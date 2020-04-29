@@ -14,9 +14,6 @@ public:
     static constexpr PLACE DEFAULT_PLACE = CPFS_DISPLAY_IN_SELECTED_TILE;
     static constexpr STATE DEFAULT_STATE = CPFIS_NONE;
 
-    Field(DWORD id, TYPE type, PLACE place = DEFAULT_PLACE, STATE state = DEFAULT_STATE) :
-        m_id(id), m_type(type), m_place(place), m_state(state) {}
-
     DWORD   GetID() const { return m_id; }
     TYPE    GetType() const { return m_type; }
     PLACE   GetPlace() const { return m_place; }
@@ -25,6 +22,11 @@ public:
     CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR GetDescriptor() const;
 
 protected:
+
+    Field(DWORD id, TYPE type, PLACE place = DEFAULT_PLACE, STATE state = DEFAULT_STATE) :
+        m_id(id), m_type(type), m_place(place), m_state(state) {}
+    virtual ~Field() {}
+
     const DWORD     m_id;
     const TYPE      m_type;
     PLACE           m_place;
