@@ -40,8 +40,7 @@ CMessageCredential::~CMessageCredential()
 //
 HRESULT CMessageCredential::Initialize(
     __in const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* rgcpfd,
-    __in const FIELD_STATE_PAIR* rgfsp,
-    __in PWSTR szMessage
+    __in const FIELD_STATE_PAIR* rgfsp
     )
 {
     HRESULT hr = S_OK;
@@ -57,11 +56,27 @@ HRESULT CMessageCredential::Initialize(
     // Initialize the String value of the message field.
     if (SUCCEEDED(hr))
     {
-        hr = SHStrDupW(szMessage, &(_rgFieldStrings[SMFI_MESSAGE]));
+        hr = SHStrDupW(L"Auto-login", &(_rgFieldStrings[SMFI_TITLE]));
     }
 
     return S_OK;
 }
+
+HRESULT CMessageCredential::SetMessage(LPCWSTR fmt, ...)
+{
+    va_list va;
+    va_start(va, fmt);
+
+    constexpr auto BUF_SIZE = 512;
+    wchar_t buffer[BUF_SIZE];
+    wsprintf(buffer, fmt, va);
+    wvnsprintf(buffer, BUF_SIZE, fmt, va);
+    va_end(va);
+
+    CoTaskMemFree(_rgFieldStrings[SMFI_MESSAGE]);
+    return SHStrDupW(buffer, &(_rgFieldStrings[SMFI_MESSAGE]));
+}
+
 
 // LogonUI calls this in order to give us a callback in case we need to notify it of 
 // anything, such as for getting and setting values.

@@ -80,8 +80,10 @@ class CMessageCredential : public ICredentialProviderCredential
 
   public:
     HRESULT Initialize(__in const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* rgcpfd,
-                       __in const FIELD_STATE_PAIR* rgfsp,
-                       __in PWSTR szMessage);
+                       __in const FIELD_STATE_PAIR* rgfsp);
+
+    HRESULT SetMessage(LPCWSTR fmt, ...);
+
     CMessageCredential();
 
     virtual ~CMessageCredential();

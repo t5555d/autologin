@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <iphlpapi.h>
 #include <thread>
+#include <atomic>
 
 class RDPState
 {
@@ -15,7 +16,10 @@ public:
         return m_rdp_peer ? m_rdp_text : nullptr;
     }
 
-    void set_interval(int interval) { m_interval = interval; }
+    void set_interval(int interval) {
+        if (interval > 0) 
+            m_interval = interval;
+    }
 
     template<typename Context>
     void set_callback(void (*callback)(Context *), Context *context) {
@@ -33,7 +37,7 @@ private:
     DWORD           m_table_size = 0;
     DWORD           m_rdp_peer = 0;
     char            m_rdp_text[16];
-    int             m_interval = 0;
+    std::atomic_int m_interval = 0;
     std::thread     m_thread;
     callback_t      m_callback = nullptr;
     void *          m_context = nullptr;

@@ -48,6 +48,13 @@ CSampleProvider::~CSampleProvider()
 // tells the infrastructure that it needs to re-enumerate the credentials.
 void CSampleProvider::OnConnectStatusChanged()
 {
+    if (_rdpState.is_rdp_active()) {
+        _pMessageCredential->SetMessage(L"Auto-login is off, due to active RDP connection with %S", _rdpState.get_rdp_text());
+    }
+    else {
+        _pMessageCredential->SetMessage(L"Auto-login is on");
+    }
+
     if (_pcpe != NULL)
     {
         _pcpe->CredentialsChanged(_upAdviseContext);
@@ -59,116 +66,71 @@ void CSampleProvider::OnConnectStatusChanged()
 HRESULT CSampleProvider::SetUsageScenario(
     __in CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus,
     __in DWORD dwFlags
-    )
+)
 {
     UNREFERENCED_PARAMETER(dwFlags);
-    HRESULT hr;
 
     // Decide which scenarios to support here. Returning E_NOTIMPL simply tells the caller
     // that we're not designed for that scenario.
     switch (cpus)
     {
     case CPUS_LOGON:
-    case CPUS_UNLOCK_WORKSTATION:       
-        _cpus = cpus;
-
-        // Create the CSampleCredential (for connected scenarios), the CMessageCredential
-        // (for disconnected scenarios), and the CCommandWindow (to detect commands, such
-        // as the connect/disconnect here).  We can get SetUsageScenario multiple times
-        // (for example, cancel back out to the CAD screen, and then hit CAD again), 
-        // but there's no point in recreating our creds, since they're the same all the
-        // time
-        
-        if (!_pCredential && !_pMessageCredential)
-        {
-            // For the locked case, a more advanced credprov might only enumerate tiles for the 
-            // user whose owns the locked session, since those are the only creds that will work
-            _pCredential = new CSampleCredential();
-            if (_pCredential != NULL)
-            {
-                _pMessageCredential = new CMessageCredential();
-                if (_pMessageCredential)
-                {
-                    hr = _pCredential->Initialize(_cpus, s_rgCredProvFieldDescriptors, s_rgFieldStatePairs);
-                    if (SUCCEEDED(hr))
-                    {
-                        hr = _pMessageCredential->Initialize(s_rgMessageCredProvFieldDescriptors, s_rgMessageFieldStatePairs, L"Please connect");
-                    }
-                }
-                else
-                {
-                    hr = E_OUTOFMEMORY;
-                }
-            }
-            else
-            {
-                hr = E_OUTOFMEMORY;
-            }
-
-            if (SUCCEEDED(hr)) {
-                _rdpState.set_callback(OnConnectStatusChanged, this);
-                _rdpState.start();
-            }
-
-            // If anything failed, clean up.
-            if (FAILED(hr))
-            {
-                if (_pCredential != NULL)
-                {
-                    _pCredential->Release();
-                    _pCredential = NULL;
-                }
-                if (_pMessageCredential != NULL)
-                {
-                    _pMessageCredential->Release();
-                    _pMessageCredential = NULL;
-                }
-            }
-        }
-        else
-        {
-            //everything's already all set up
-            hr = S_OK;
-        }
+    case CPUS_UNLOCK_WORKSTATION:
         break;
 
     case CPUS_CREDUI:
     case CPUS_CHANGE_PASSWORD:
-        hr = E_NOTIMPL;
-        break;
+        return E_NOTIMPL;
 
     default:
-        hr = E_INVALIDARG;
-        break;
+        return E_INVALIDARG;
+    }
+
+    HRESULT hr = S_OK;
+
+    _cpus = cpus;
+
+    try {
+        if (SUCCEEDED(hr) && !_pCredential)
+        {
+            _pCredential = new CSampleCredential();
+            hr = _pCredential->Initialize(_cpus, s_rgCredProvFieldDescriptors, s_rgFieldStatePairs);
+        }
+
+        if (SUCCEEDED(hr) && !_pMessageCredential)
+        {
+            _pMessageCredential = new CMessageCredential();
+            hr = _pMessageCredential->Initialize(s_rgMessageCredProvFieldDescriptors, s_rgMessageFieldStatePairs);
+        }
+
+        if (SUCCEEDED(hr))
+        {
+            _rdpState.set_callback(OnConnectStatusChanged, this);
+            _rdpState.start();
+        }
+
+    }
+    catch (const std::bad_alloc&)
+    {
+        hr = E_OUTOFMEMORY;
+    }
+
+    // If anything failed, clean up.
+    if (FAILED(hr))
+    {
+        if (_pCredential != NULL)
+        {
+            _pCredential->Release();
+            _pCredential = NULL;
+        }
+        if (_pMessageCredential != NULL)
+        {
+            _pMessageCredential->Release();
+            _pMessageCredential = NULL;
+        }
     }
 
     return hr;
-}
-
-// SetSerialization takes the kind of buffer that you would normally return to LogonUI for
-// an authentication attempt.  It's the opposite of ICredentialProviderCredential::GetSerialization.
-// GetSerialization is implement by a credential and serializes that credential.  Instead,
-// SetSerialization takes the serialization and uses it to create a tile.
-//
-// SetSerialization is called for two main scenarios.  The first scenario is in the credui case
-// where it is prepopulating a tile with credentials that the user chose to store in the OS.
-// The second situation is in a remote logon case where the remote client may wish to 
-// prepopulate a tile with a username, or in some cases, completely populate the tile and
-// use it to logon without showing any UI.
-//
-// If you wish to see an example of SetSerialization, please see either the SampleCredentialProvider
-// sample or the SampleCredUICredentialProvider sample.  [The logonUI team says, "The original sample that
-// this was built on top of didn't have SetSerialization.  And when we decided SetSerialization was
-// important enough to have in the sample, it ended up being a non-trivial amount of work to integrate
-// it into the main sample.  We felt it was more important to get these samples out to you quickly than to
-// hold them in order to do the work to integrate the SetSerialization changes from SampleCredentialProvider 
-// into this sample.]
-HRESULT CSampleProvider::SetSerialization(
-    __in const CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION* pcpcs
-    )
-{
-    UNREFERENCED_PARAMETER(pcpcs);
-    return E_NOTIMPL;
 }
 
 // Called by LogonUI to give you a callback. Providers often use the callback if they

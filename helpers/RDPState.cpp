@@ -1,12 +1,15 @@
 #include "RDPState.h"
 
-#pragma comment(lib, "iphlpapi.lib")
-#pragma comment(lib, "ws2_32.lib")
-
 void RDPState::start(int interval)
 {
-    m_interval = interval;
-    m_thread.swap(std::thread(&RDPState::watch, this));
+    if (m_interval == 0) {
+        m_interval = interval;
+        std::thread new_thread(&RDPState::watch, this);
+        m_thread.swap(new_thread);
+    }
+    else {
+        set_interval(interval);
+    }
 }
 
 void RDPState::stop()

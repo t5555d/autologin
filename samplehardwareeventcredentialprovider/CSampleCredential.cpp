@@ -117,7 +117,7 @@ HRESULT CSampleCredential::UnAdvise()
 // selected, you would do it here.
 HRESULT CSampleCredential::SetSelected(__out BOOL* pbAutoLogon)  
 {
-    *pbAutoLogon = FALSE;  
+    *pbAutoLogon = TRUE;
     return S_OK;
 }
 
