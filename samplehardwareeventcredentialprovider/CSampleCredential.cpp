@@ -17,80 +17,29 @@
 #include "guid.h"
 
 
-// CSampleCredential ////////////////////////////////////////////////////////
-
-CSampleCredential::~CSampleCredential()
-{
-    if (_rgFieldStrings[SFI_PASSWORD])
-    {
-        size_t lenPassword = lstrlen(_rgFieldStrings[SFI_PASSWORD]);
-        SecureZeroMemory(_rgFieldStrings[SFI_PASSWORD], lenPassword * sizeof(*_rgFieldStrings[SFI_PASSWORD]));
-    }
-    for (int i = 0; i < ARRAYSIZE(_rgFieldStrings); i++)
-    {
-        CoTaskMemFree(_rgFieldStrings[i]);
-        CoTaskMemFree(_rgCredProvFieldDescriptors[i].pszLabel);
-    }
-}
-
 // Initializes one credential with the field information passed in.
 // Set the value of the SFI_USERNAME field to pwzUsername.
-HRESULT CSampleCredential::Initialize(
-    CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus,
-    const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* rgcpfd,
-    const FIELD_STATE_PAIR* rgfsp
-    )
+HRESULT CSampleCredential::Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO usage)
 {
-    HRESULT hr = S_OK;
+    m_usage = usage;
 
-    _cpus = cpus;
-
-    // Copy the field descriptors for each field. This is useful if you want to vary the field
-    // descriptors based on what Usage scenario the credential was created for.
-    for (DWORD i = 0; SUCCEEDED(hr) && i < ARRAYSIZE(_rgCredProvFieldDescriptors); i++)
-    {
-        _rgFieldStatePairs[i] = rgfsp[i];
-        hr = FieldDescriptorCopy(rgcpfd[i], &_rgCredProvFieldDescriptors[i]);
-    }
-
-    // Initialize the String value of all the fields.
-    if (SUCCEEDED(hr))
-    {
-        hr = SHStrDupW(L"testbot", &_rgFieldStrings[SFI_USERNAME]);
-    }
-    if (SUCCEEDED(hr))
-    {
-        hr = SHStrDupW(L"Test1234", &_rgFieldStrings[SFI_PASSWORD]);
-    }
+    m_fields[SFI_USERNAME].SetValue(L"testbot");
+    m_fields[SFI_PASSWORD].SetValue(L"Test1234");
 
     return S_OK;
 }
 
-// LogonUI calls this in order to give us a callback in case we need to notify it of anything.
-HRESULT CSampleCredential::Advise(
-    ICredentialProviderCredentialEvents* pcpce
-    )
+HRESULT CSampleCredential::GetFieldDescriptorAt(
+    DWORD dwIndex,
+    CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc)
 {
-    if (_pCredProvCredentialEvents != NULL)
-    {
-        _pCredProvCredentialEvents->Release();
-    }
-    _pCredProvCredentialEvents = pcpce;
-    _pCredProvCredentialEvents->AddRef();
-
-    return S_OK;
+    if (dwIndex < SFI_NUM_FIELDS)
+        return FieldDescriptorCoAllocCopy(m_fields[dwIndex].GetDescriptor(), desc);
+    else
+        return E_INVALIDARG;
 }
 
-// LogonUI calls this to tell us to release the callback.
-HRESULT CSampleCredential::UnAdvise()
-{
-    if (_pCredProvCredentialEvents)
-    {
-        _pCredProvCredentialEvents->Release();
-    }
-    _pCredProvCredentialEvents = NULL;
-    return S_OK;
-}
+
 
 // LogonUI calls this function when our tile is selected (zoomed)
 // If you simply want fields to show/hide based on the selected state,
@@ -104,84 +53,53 @@ HRESULT CSampleCredential::SetSelected(__out BOOL* pbAutoLogon)
     return S_OK;
 }
 
-// Similarly to SetSelected, LogonUI calls this when your tile was selected
-// and now no longer is.  The most common thing to do here (which we do below)
-// is to clear out the password field.
-HRESULT CSampleCredential::SetDeselected()
-{
-    HRESULT hr = S_OK;
-    if (_rgFieldStrings[SFI_PASSWORD])
-    {
-        size_t lenPassword = lstrlen(_rgFieldStrings[SFI_PASSWORD]);
-        SecureZeroMemory(_rgFieldStrings[SFI_PASSWORD], lenPassword * sizeof(*_rgFieldStrings[SFI_PASSWORD]));
-    
-        CoTaskMemFree(_rgFieldStrings[SFI_PASSWORD]);
-        hr = SHStrDupW(L"", &_rgFieldStrings[SFI_PASSWORD]);
-        if (SUCCEEDED(hr) && _pCredProvCredentialEvents)
-        {
-            _pCredProvCredentialEvents->SetFieldString(this, SFI_PASSWORD, _rgFieldStrings[SFI_PASSWORD]);
-        }
-    }
-
-    return hr;
-}
-
 // Get info for a particular field of a tile. Called by logonUI to get information to 
 // display the tile.
 HRESULT CSampleCredential::GetFieldState(
     DWORD dwFieldID,
-    CREDENTIAL_PROVIDER_FIELD_STATE* pcpfs,
-    CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis
+    CREDENTIAL_PROVIDER_FIELD_STATE* place,
+    CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* state
     )
 {
-    HRESULT hr;
-    
-    if (dwFieldID < ARRAYSIZE(_rgFieldStatePairs) && pcpfs && pcpfis)
+    if (dwFieldID < SFI_NUM_FIELDS && place && state)
     {
-        *pcpfis = _rgFieldStatePairs[dwFieldID].cpfis;
-        *pcpfs = _rgFieldStatePairs[dwFieldID].cpfs;
+        *state = m_fields[dwFieldID].GetState();
+        *place = m_fields[dwFieldID].GetPlace();
 
-        hr = S_OK;
+        return S_OK;
     }
     else
     {
-        hr = E_INVALIDARG;
+        return E_INVALIDARG;
     }
-    return hr;
 }
 
 // Sets ppwsz to the string value of the field at the index dwFieldID.
 HRESULT CSampleCredential::GetStringValue(
     DWORD dwFieldID, 
-    __deref_out PWSTR* ppwsz
+    __deref_out PWSTR* value
     )
 {
-    HRESULT hr;
-
-    // Check to make sure dwFieldID is a legitimate index.
-    if (dwFieldID < ARRAYSIZE(_rgCredProvFieldDescriptors) && ppwsz) 
+    if (dwFieldID < SFI_NUM_FIELDS && value)
     {
         // Make a copy of the string and return that. The caller
         // is responsible for freeing it.
-        hr = SHStrDupW(_rgFieldStrings[dwFieldID], ppwsz);
+        return SHStrDupW(m_fields[dwFieldID].GetValue(), value);
     }
     else
     {
-        hr = E_INVALIDARG;
+        return E_INVALIDARG;
     }
-
-    return hr;
 }
 
 // Collect the username and password into a serialized credential for the correct usage scenario 
 // (logon/unlock is what's demonstrated in this sample).  LogonUI then passes these credentials 
 // back to the system to log on.
 HRESULT CSampleCredential::GetSerialization(
-    __out CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr,
-    __out CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION* pcpcs, 
-    __deref_out_opt PWSTR* ppwszOptionalStatusText, 
-    __out CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon
-    )
+    CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr,
+    CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION* pcpcs, 
+    PWSTR* ppwszOptionalStatusText, 
+    CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon)
 {
     UNREFERENCED_PARAMETER(ppwszOptionalStatusText);
     UNREFERENCED_PARAMETER(pcpsiOptionalStatusIcon);
@@ -189,59 +107,56 @@ HRESULT CSampleCredential::GetSerialization(
     KERB_INTERACTIVE_LOGON kil;
     ZeroMemory(&kil, sizeof(kil));
 
-    HRESULT hr;
-
-    WCHAR wsz[MAX_COMPUTERNAME_LENGTH+1];
-    DWORD cch = ARRAYSIZE(wsz);
-    if (GetComputerNameW(wsz, &cch))
-    {
-        PWSTR pwzProtectedPassword;
-
-        hr = ProtectIfNecessaryAndCopyPassword(_rgFieldStrings[SFI_PASSWORD], _cpus, &pwzProtectedPassword);
-
-        if (SUCCEEDED(hr))
-        {
-            KERB_INTERACTIVE_UNLOCK_LOGON kiul;
-
-            // Initialize kiul with weak references to our credential.
-            hr = KerbInteractiveUnlockLogonInit(wsz, _rgFieldStrings[SFI_USERNAME], pwzProtectedPassword, _cpus, &kiul);
-
-            if (SUCCEEDED(hr))
-            {
-                // We use KERB_INTERACTIVE_UNLOCK_LOGON in both unlock and logon scenarios.  It contains a
-                // KERB_INTERACTIVE_LOGON to hold the creds plus a LUID that is filled in for us by Winlogon
-                // as necessary.
-                hr = KerbInteractiveUnlockLogonPack(kiul, &pcpcs->rgbSerialization, &pcpcs->cbSerialization);
-
-                if (SUCCEEDED(hr))
-                {
-                    ULONG ulAuthPackage;
-                    hr = RetrieveNegotiateAuthPackage(&ulAuthPackage);
-                    if (SUCCEEDED(hr))
-                    {
-                        pcpcs->ulAuthenticationPackage = ulAuthPackage;
-                        pcpcs->clsidCredentialProvider = CLSID_CSample;
- 
-                        // At this point the credential has created the serialized credential used for logon
-                        // By setting this to CPGSR_RETURN_CREDENTIAL_FINISHED we are letting logonUI know
-                        // that we have all the information we need and it should attempt to submit the 
-                        // serialized credential.
-                        *pcpgsr = CPGSR_RETURN_CREDENTIAL_FINISHED;
-                    }
-                }
-            }
-
-            CoTaskMemFree(pwzProtectedPassword);
-        }
-    }
-    else
+    WCHAR domain[MAX_COMPUTERNAME_LENGTH+1];
+    DWORD cch = ARRAYSIZE(domain);
+    if (!GetComputerNameW(domain, &cch))
     {
         DWORD dwErr = GetLastError();
-        hr = HRESULT_FROM_WIN32(dwErr);
+        return HRESULT_FROM_WIN32(dwErr);
     }
+
+    PWSTR username = nullptr;
+    PWSTR password = nullptr;
+    KERB_INTERACTIVE_UNLOCK_LOGON kiul;
+
+    HRESULT hr = SHStrDupW(m_fields[SFI_USERNAME].GetValue(), &username);
+
+    if (SUCCEEDED(hr))
+        hr = ProtectIfNecessaryAndCopyPassword(m_fields[SFI_PASSWORD].GetValue(), m_usage, &password);
+
+    // Initialize kiul with weak references to our credential.
+    if (SUCCEEDED(hr))
+        hr = KerbInteractiveUnlockLogonInit(domain, username, password, m_usage, &kiul);
+
+    // We use KERB_INTERACTIVE_UNLOCK_LOGON in both unlock and logon scenarios.  It contains a
+    // KERB_INTERACTIVE_LOGON to hold the creds plus a LUID that is filled in for us by Winlogon
+    // as necessary.
+    if (SUCCEEDED(hr))
+        hr = KerbInteractiveUnlockLogonPack(kiul, &pcpcs->rgbSerialization, &pcpcs->cbSerialization);
+
+    if (SUCCEEDED(hr))
+    {
+        ULONG ulAuthPackage;
+        hr = RetrieveNegotiateAuthPackage(&ulAuthPackage);
+        if (SUCCEEDED(hr))
+        {
+            pcpcs->ulAuthenticationPackage = ulAuthPackage;
+            pcpcs->clsidCredentialProvider = CLSID_CSample;
+
+            // At this point the credential has created the serialized credential used for logon
+            // By setting this to CPGSR_RETURN_CREDENTIAL_FINISHED we are letting logonUI know
+            // that we have all the information we need and it should attempt to submit the 
+            // serialized credential.
+            *pcpgsr = CPGSR_RETURN_CREDENTIAL_FINISHED;
+        }
+    }
+
+    CoTaskMemFree(username);
+    CoTaskMemFree(password);
 
     return hr;
 }
+
 struct REPORT_RESULT_STATUS_INFO
 {
     NTSTATUS ntsStatus;
@@ -263,8 +178,8 @@ static const REPORT_RESULT_STATUS_INFO s_rgLogonStatusInfo[] =
 HRESULT CSampleCredential::ReportResult(
     NTSTATUS ntsStatus, 
     NTSTATUS ntsSubstatus,
-    __deref_out_opt PWSTR* ppwszOptionalStatusText, 
-    __out CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon
+    PWSTR* ppwszOptionalStatusText, 
+    CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon
     )
 {
     *ppwszOptionalStatusText = NULL;

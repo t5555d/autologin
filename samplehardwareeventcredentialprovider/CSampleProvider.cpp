@@ -49,10 +49,10 @@ CSampleProvider::~CSampleProvider()
 void CSampleProvider::OnConnectStatusChanged()
 {
     if (_rdpState.is_rdp_active()) {
-        _pMessageCredential->SetMessage(L"Auto-login is off, due to active RDP connection with %S", _rdpState.get_rdp_text());
+        _pMessageCredential->SetText(SMFI_MESSAGE, L"Auto-login is off, due to active RDP connection with %S", _rdpState.get_rdp_text());
     }
     else {
-        _pMessageCredential->SetMessage(L"Auto-login is on");
+        _pMessageCredential->SetText(SMFI_MESSAGE, L"Auto-login is on");
     }
 
     if (_pcpe != NULL)
@@ -94,13 +94,13 @@ HRESULT CSampleProvider::SetUsageScenario(
         if (SUCCEEDED(hr) && !_pCredential)
         {
             _pCredential = new CSampleCredential();
-            hr = _pCredential->Initialize(_cpus, s_rgCredProvFieldDescriptors, s_rgFieldStatePairs);
+            hr = _pCredential->Initialize(_cpus);
         }
 
         if (SUCCEEDED(hr) && !_pMessageCredential)
         {
             _pMessageCredential = new CMessageCredential();
-            hr = _pMessageCredential->Initialize(s_rgMessageCredProvFieldDescriptors, s_rgMessageFieldStatePairs);
+            _pMessageCredential->SetText(SMFI_TITLE, L"Auto-login");
         }
 
         if (SUCCEEDED(hr))
@@ -108,7 +108,6 @@ HRESULT CSampleProvider::SetUsageScenario(
             _rdpState.set_callback(OnConnectStatusChanged, this);
             _rdpState.start();
         }
-
     }
     catch (const std::bad_alloc&)
     {
@@ -165,19 +164,9 @@ HRESULT CSampleProvider::UnAdvise()
 // of fields to be displayed on our active tile, which depends on our connected state. The
 // "connected" CSampleCredential has SFI_NUM_FIELDS fields, whereas the "disconnected" 
 // CMessageCredential has SMFI_NUM_FIELDS fields.
-HRESULT CSampleProvider::GetFieldDescriptorCount(
-    __out DWORD* pdwCount
-    )
+HRESULT CSampleProvider::GetFieldDescriptorCount(__out DWORD* pdwCount)
 {
-    if (!_rdpState.is_rdp_active())
-    {
-        *pdwCount = SFI_NUM_FIELDS;
-    }
-    else
-    {
-        *pdwCount = SMFI_NUM_FIELDS;
-    }
-  
+    *pdwCount = _rdpState.is_rdp_active() ? SMFI_NUM_FIELDS : SFI_NUM_FIELDS;
     return S_OK;
 }
 
@@ -185,37 +174,13 @@ HRESULT CSampleProvider::GetFieldDescriptorCount(
 // tile to use based on the "connected" status.
 HRESULT CSampleProvider::GetFieldDescriptorAt(
     __in DWORD dwIndex, 
-    __deref_out CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** ppcpfd
+    __deref_out CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc
     )
-{    
-    HRESULT hr;
-
+{
     if (!_rdpState.is_rdp_active())
-    {
-        // Verify dwIndex is a valid field.
-        if ((dwIndex < SFI_NUM_FIELDS) && ppcpfd)
-        {
-            hr = FieldDescriptorCoAllocCopy(s_rgCredProvFieldDescriptors[dwIndex], ppcpfd);
-        }
-        else
-        { 
-            hr = E_INVALIDARG;
-        }
-    }
+        return _pCredential->GetFieldDescriptorAt(dwIndex, desc);
     else
-    {
-        // Verify dwIndex is a valid field.
-        if ((dwIndex < SMFI_NUM_FIELDS) && ppcpfd)
-        {
-            hr = FieldDescriptorCoAllocCopy(s_rgMessageCredProvFieldDescriptors[dwIndex], ppcpfd);
-        }
-        else
-        { 
-            hr = E_INVALIDARG;
-        }
-    }
-
-    return hr;
+        return _pMessageCredential->GetFieldDescriptorAt(dwIndex, desc);
 }
 
 // We only use one tile at any given time since the system can either be "connected" or 
