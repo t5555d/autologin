@@ -12,23 +12,12 @@
 #include <ntstatus.h>
 #define WIN32_NO_STATUS
 #endif
-#include <unknwn.h>
+
 #include "CSampleCredential.h"
 #include "guid.h"
 
 
 // CSampleCredential ////////////////////////////////////////////////////////
-
-CSampleCredential::CSampleCredential():
-    _cRef(1),
-    _pCredProvCredentialEvents(NULL)
-{
-    DllAddRef();
-
-    ZeroMemory(_rgCredProvFieldDescriptors, sizeof(_rgCredProvFieldDescriptors));
-    ZeroMemory(_rgFieldStatePairs, sizeof(_rgFieldStatePairs));
-    ZeroMemory(_rgFieldStrings, sizeof(_rgFieldStrings));
-}
 
 CSampleCredential::~CSampleCredential()
 {
@@ -42,16 +31,14 @@ CSampleCredential::~CSampleCredential()
         CoTaskMemFree(_rgFieldStrings[i]);
         CoTaskMemFree(_rgCredProvFieldDescriptors[i].pszLabel);
     }
-
-    DllRelease();
 }
 
 // Initializes one credential with the field information passed in.
 // Set the value of the SFI_USERNAME field to pwzUsername.
 HRESULT CSampleCredential::Initialize(
-    __in CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus,
-    __in const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* rgcpfd,
-    __in const FIELD_STATE_PAIR* rgfsp
+    CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus,
+    const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* rgcpfd,
+    const FIELD_STATE_PAIR* rgfsp
     )
 {
     HRESULT hr = S_OK;
@@ -81,7 +68,7 @@ HRESULT CSampleCredential::Initialize(
 
 // LogonUI calls this in order to give us a callback in case we need to notify it of anything.
 HRESULT CSampleCredential::Advise(
-    __in ICredentialProviderCredentialEvents* pcpce
+    ICredentialProviderCredentialEvents* pcpce
     )
 {
     if (_pCredProvCredentialEvents != NULL)
@@ -142,9 +129,9 @@ HRESULT CSampleCredential::SetDeselected()
 // Get info for a particular field of a tile. Called by logonUI to get information to 
 // display the tile.
 HRESULT CSampleCredential::GetFieldState(
-    __in DWORD dwFieldID,
-    __in CREDENTIAL_PROVIDER_FIELD_STATE* pcpfs,
-    __in CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis
+    DWORD dwFieldID,
+    CREDENTIAL_PROVIDER_FIELD_STATE* pcpfs,
+    CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis
     )
 {
     HRESULT hr;
@@ -165,7 +152,7 @@ HRESULT CSampleCredential::GetFieldState(
 
 // Sets ppwsz to the string value of the field at the index dwFieldID.
 HRESULT CSampleCredential::GetStringValue(
-    __in DWORD dwFieldID, 
+    DWORD dwFieldID, 
     __deref_out PWSTR* ppwsz
     )
 {
@@ -274,8 +261,8 @@ static const REPORT_RESULT_STATUS_INFO s_rgLogonStatusInfo[] =
 // customize the error shown in the case of bad username/password and in the case of the account
 // being disabled.
 HRESULT CSampleCredential::ReportResult(
-    __in NTSTATUS ntsStatus, 
-    __in NTSTATUS ntsSubstatus,
+    NTSTATUS ntsStatus, 
+    NTSTATUS ntsSubstatus,
     __deref_out_opt PWSTR* ppwszOptionalStatusText, 
     __out CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon
     )

@@ -13,16 +13,6 @@
 
 // CMessageCredential ////////////////////////////////////////////////////////
 
-CMessageCredential::CMessageCredential():
-    _cRef(1)
-{
-    DllAddRef();
-
-    ZeroMemory(_rgCredProvFieldDescriptors, sizeof(_rgCredProvFieldDescriptors));
-    ZeroMemory(_rgFieldStatePairs, sizeof(_rgFieldStatePairs));
-    ZeroMemory(_rgFieldStrings, sizeof(_rgFieldStrings));
-}
-
 CMessageCredential::~CMessageCredential()
 {
     for (int i = 0; i < ARRAYSIZE(_rgFieldStrings); i++)
@@ -30,8 +20,6 @@ CMessageCredential::~CMessageCredential()
         CoTaskMemFree(_rgFieldStrings[i]);
         CoTaskMemFree(_rgCredProvFieldDescriptors[i].pszLabel);
     }
-
-    DllRelease();
 }
 
 //
@@ -39,8 +27,8 @@ CMessageCredential::~CMessageCredential()
 // Set the value of the SFI_USERNAME field to pwzUsername.
 //
 HRESULT CMessageCredential::Initialize(
-    __in const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* rgcpfd,
-    __in const FIELD_STATE_PAIR* rgfsp
+    const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* rgcpfd,
+    const FIELD_STATE_PAIR* rgfsp
     )
 {
     HRESULT hr = S_OK;
@@ -102,10 +90,7 @@ HRESULT CMessageCredential::GetFieldState(
 }
 
 // Called to request the string value of the indicated field.
-HRESULT CMessageCredential::GetStringValue(
-    __in DWORD dwFieldID, 
-    __deref_out PWSTR* ppwsz
-    )
+HRESULT CMessageCredential::GetStringValue(DWORD dwFieldID, PWSTR* ppwsz)
 {
     HRESULT hr;
 

@@ -16,96 +16,84 @@
 #pragma once
 
 #include <helpers.h>
-#include "common.h"
-#include "dll.h"
+#include "CBaseCredential.h"
 
-class CSampleCredential : public ICredentialProviderCredential
+// The indexes of each of the fields in our credential provider's tiles.
+enum SAMPLE_FIELD_ID
 {
-    public:
-    // IUnknown
-    IFACEMETHODIMP_(ULONG) AddRef()
-    {
-        return ++_cRef;
-    }
-    
-    IFACEMETHODIMP_(ULONG) Release()
-    {
-        LONG cRef = --_cRef;
-        if (!cRef)
-        {
-            delete this;
-        }
-        return cRef;
-    }
+    SFI_USERNAME,
+    SFI_PASSWORD,
+    SFI_NUM_FIELDS
+};
 
-    IFACEMETHODIMP QueryInterface(__in REFIID riid, __deref_out void** ppv)
-    {
-        static const QITAB qit[] =
-        {
-            QITABENT(CSampleCredential, ICredentialProviderCredential), // IID_ICredentialProviderCredential
-            {0},
-        };
-        return QISearch(this, qit, riid, ppv);
-    }
-  public:
+// The field state value indicates whether the field is displayed
+// in the selected tile, the deselected tile, or both.
+// The Field interactive state indicates when 
+static const FIELD_STATE_PAIR s_rgFieldStatePairs[] =
+{
+    { CPFS_DISPLAY_IN_BOTH, CPFIS_NONE },                   // SFI_USERNAME
+    { CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_FOCUSED },       // SFI_PASSWORD
+};
+
+// Field descriptors for unlock and logon.
+// The first field is the index of the field.
+// The second is the type of the field.
+// The third is the name of the field, NOT the value which will appear in the field.
+static const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR s_rgCredProvFieldDescriptors[] =
+{
+    { SFI_USERNAME, CPFT_LARGE_TEXT, L"Username" },
+    { SFI_PASSWORD, CPFT_PASSWORD_TEXT, L"Password" },
+};
+
+
+class CSampleCredential : public CBaseCredential
+{
+public:
     // ICredentialProviderCredential
-    IFACEMETHODIMP Advise(__in ICredentialProviderCredentialEvents* pcpce);
-    IFACEMETHODIMP UnAdvise();
+    IFACEMETHODIMP Advise(ICredentialProviderCredentialEvents* pcpce) override;
+    IFACEMETHODIMP UnAdvise() override;
 
-    IFACEMETHODIMP SetSelected(__out BOOL* pbAutoLogon);
-    IFACEMETHODIMP SetDeselected();
+    IFACEMETHODIMP SetSelected(BOOL* pbAutoLogon) override;
+    IFACEMETHODIMP SetDeselected() override;
 
-    IFACEMETHODIMP GetFieldState(__in DWORD dwFieldID,
-                                 __out CREDENTIAL_PROVIDER_FIELD_STATE* pcpfs,
-                                 __out CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis);
+    IFACEMETHODIMP GetFieldState(DWORD dwFieldID,
+                                 CREDENTIAL_PROVIDER_FIELD_STATE* pcpfs,
+                                 CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis) override;
 
-    IFACEMETHODIMP GetStringValue(__in DWORD dwFieldID, __deref_out PWSTR* ppwsz);
+    IFACEMETHODIMP GetStringValue(DWORD dwFieldID, PWSTR* ppwsz) override;
 
-    IFACEMETHODIMP GetSerialization(__out CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr, 
-                                    __out CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION* pcpcs, 
-                                    __deref_out_opt PWSTR* ppwszOptionalStatusText, 
-                                    __out CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon);
-    IFACEMETHODIMP ReportResult(__in NTSTATUS ntsStatus, 
-                                __in NTSTATUS ntsSubstatus,
-                                __deref_out_opt PWSTR* ppwszOptionalStatusText, 
-                                __out CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon);
-
-  public: // unused methods : not required, since this control doesn't have such fields
-
-    IFACEMETHODIMP GetBitmapValue(DWORD, HBITMAP*) { return E_NOTIMPL; }
-    IFACEMETHODIMP GetCheckboxValue(DWORD, BOOL*, PWSTR*) { return E_NOTIMPL; }
-    IFACEMETHODIMP GetComboBoxValueCount(DWORD, DWORD*, DWORD*) { return E_NOTIMPL; }
-    IFACEMETHODIMP GetComboBoxValueAt(DWORD, DWORD, PWSTR*) { return E_NOTIMPL; }
-    IFACEMETHODIMP GetSubmitButtonValue(DWORD, DWORD*) { return E_NOTIMPL; }
-    IFACEMETHODIMP SetStringValue(DWORD, PCWSTR) { return E_NOTIMPL; }
-    IFACEMETHODIMP SetCheckboxValue(DWORD, BOOL) { return E_NOTIMPL; }
-    IFACEMETHODIMP SetComboBoxSelectedValue(DWORD, DWORD) { return E_NOTIMPL; }
-    IFACEMETHODIMP CommandLinkClicked(DWORD) { return E_NOTIMPL; }
+    IFACEMETHODIMP GetSerialization(CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr, 
+                                    CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION* pcpcs, 
+                                    PWSTR* ppwszOptionalStatusText, 
+                                    CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon) override;
+    IFACEMETHODIMP ReportResult(NTSTATUS ntsStatus, 
+                                NTSTATUS ntsSubstatus,
+                                PWSTR* ppwszOptionalStatusText, 
+                                CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon) override;
 
   public:
-    HRESULT Initialize(__in CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus,
-                       __in const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* rgcpfd,
-                       __in const FIELD_STATE_PAIR* rgfsp);
-    CSampleCredential();
+    HRESULT Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus,
+                       const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* rgcpfd,
+                       const FIELD_STATE_PAIR* rgfsp);
+
+    CSampleCredential() = default;
 
     virtual ~CSampleCredential();
 
   private:
-    LONG                                  _cRef;
-
     CREDENTIAL_PROVIDER_USAGE_SCENARIO    _cpus; // The usage scenario for which we were enumerated.
 
-    CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR  _rgCredProvFieldDescriptors[SFI_NUM_FIELDS];  // An array holding the type 
+    CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR  _rgCredProvFieldDescriptors[SFI_NUM_FIELDS]{};// An array holding the type 
                                                                                         // and name of each field in 
                                                                                         // the tile.
 
-    FIELD_STATE_PAIR                      _rgFieldStatePairs[SFI_NUM_FIELDS];           // An array holding the state 
+    FIELD_STATE_PAIR                      _rgFieldStatePairs[SFI_NUM_FIELDS]{};         // An array holding the state 
                                                                                         // of each field in the tile.
 
-    PWSTR                                 _rgFieldStrings[SFI_NUM_FIELDS];              // An array holding the string 
+    PWSTR                                 _rgFieldStrings[SFI_NUM_FIELDS]{};            // An array holding the string 
                                                                                         // value of each field. This is 
                                                                                         // different from the name of 
                                                                                         // the field held in 
                                                                                         // _rgCredProvFieldDescriptors.
-    ICredentialProviderCredentialEvents* _pCredProvCredentialEvents;                  
+    ICredentialProviderCredentialEvents* _pCredProvCredentialEvents = nullptr;
 };
