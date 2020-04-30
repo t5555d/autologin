@@ -20,9 +20,21 @@ void RDPState::stop()
         thread.join();
 }
 
+static WORD getRDPPort()
+{
+    DWORD port = 3389, size = sizeof(port);
+    HKEY key;
+    LONG error = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp", 0, KEY_READ, &key);
+    if (error == ERROR_SUCCESS) {
+        RegQueryValueExA(key, "PortNumber", 0, NULL, reinterpret_cast<LPBYTE>(&port), &size);
+        RegCloseKey(key);
+    }
+    return (WORD) port;
+}
+
 void RDPState::watch()
 {
-    const auto RDP_PORT = htons(3389);
+    const auto RDP_PORT = htons(getRDPPort());
 
     while (interval > 0) {
         auto res = GetTcpTable(table, &tableSize, true);
