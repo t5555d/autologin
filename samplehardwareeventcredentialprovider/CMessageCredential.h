@@ -2,10 +2,10 @@
 
 #include "CBaseCredential.h"
 
-enum SAMPLE_MESSAGE_FIELD_ID
+enum MESSAGE_FIELD_ID
 {
-    SMFI_TITLE,
-    SMFI_MESSAGE
+    MSG_TITLE,
+    MSG_MESSAGE
 };
 
 class CMessageCredential : public CBaseCredential
@@ -20,12 +20,12 @@ public:
 
     CMessageCredential()
     {
-        registerField(m_title);
-        registerField(m_message);
+        registerField(titleField);
+        registerField(messageField);
     }
 
 private:
 
-    StringField m_title{ SMFI_TITLE, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_BOTH };
-    StringField m_message{ SMFI_MESSAGE, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE };
+    StringField titleField{ MSG_TITLE, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_BOTH };
+    StringField messageField{ MSG_MESSAGE, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE };
 };

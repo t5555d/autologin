@@ -16,22 +16,21 @@ public:
     static constexpr PLACE DEFAULT_PLACE = CPFS_DISPLAY_IN_SELECTED_TILE;
     static constexpr STATE DEFAULT_STATE = CPFIS_NONE;
 
-    DWORD   GetID() const { return m_id; }
-    TYPE    GetType() const { return m_type; }
-    PLACE   GetPlace() const { return m_place; }
-    STATE   GetState() const { return m_state; }
+    DWORD   GetID() const { return id; }
+    TYPE    GetType() const { return type; }
+    PLACE   GetPlace() const { return place; }
+    STATE   GetState() const { return state; }
 
 protected:
 
     Field(DWORD id, TYPE type, PLACE place = DEFAULT_PLACE, STATE state = DEFAULT_STATE) :
-        m_id(id), m_type(type), m_place(place), m_state(state) {}
+        id(id), type(type), place(place), state(state) {}
     virtual ~Field() {}
 
-    const DWORD     m_id;
-    const TYPE      m_type;
-    PLACE           m_place;
-    STATE           m_state;
-    LPCWSTR         m_label;
+    const DWORD     id;
+    const TYPE      type;
+    PLACE           place;
+    STATE           state;
 };
 
 class StringField : public Field
@@ -44,17 +43,17 @@ public:
         Field(id, type, place, state) {}
     ~StringField() { clean(); }
 
-    LPCWSTR GetValue() const { return m_value.c_str(); }
+    LPCWSTR GetValue() const { return value.c_str(); }
 
-    void SetValue(LPCWSTR value)
+    void SetValue(LPCWSTR text)
     {
-        if (m_type == CPFT_PASSWORD_TEXT)
+        if (type == CPFT_PASSWORD_TEXT)
             clean();
-        m_value = value;
+        value = text;
     }
 
 private:
-    std::wstring m_value;
+    std::wstring value;
 
     void clean();
 };
@@ -101,18 +100,18 @@ protected:
     void registerField(Field& field)
     {
         size_t min_size = field.GetID() + 1;
-        if (m_fields.size() < min_size)
-            m_fields.resize(min_size);
-        m_fields[field.GetID()] = &field;
+        if (fields.size() < min_size)
+            fields.resize(min_size);
+        fields[field.GetID()] = &field;
     }
 
     Field *getField(DWORD id)
     {
-        if (id >= m_fields.size())
+        if (id >= fields.size())
             return nullptr;
-        return m_fields[id];
+        return fields[id];
     }
 
 private:
-    std::vector<Field *> m_fields;
+    std::vector<Field *> fields;
 };

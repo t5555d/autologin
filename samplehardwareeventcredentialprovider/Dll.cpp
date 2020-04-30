@@ -1,18 +1,7 @@
-//
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//
-// Standard dll required functions and class factory implementation.
-
 #include <windows.h>
-#include <unknwn.h>
 #include <WinCred.h>
 #include "CUnknown.h"
-#include "CSampleProvider.h"
+#include "CDefaultProvider.h"
 
 static LONG g_cRef = 0;   // global dll reference count
 
@@ -31,37 +20,26 @@ STDAPI DllCanUnloadNow()
     return (g_cRef > 0) ? S_FALSE : S_OK;
 }
 
-extern HRESULT CSample_CreateInstance(REFIID riid, void** ppv);
-
 class CClassFactory : public CUnknown<IClassFactory>
 {
 public: // IClassFactory
 
     HRESULT CreateInstance(IUnknown* pUnkOuter, REFIID riid, void **ppv) override
     {
-        HRESULT hr;
         if (!pUnkOuter)
         {
-            hr = CSample_CreateInstance(riid, ppv);
+            return ::CreateInstance<CDefaultProvider>(riid, ppv);
         }
         else
         {
             *ppv = NULL;
-            hr = CLASS_E_NOAGGREGATION;
+            return CLASS_E_NOAGGREGATION;
         }
-        return hr;
     }
 
     HRESULT LockServer(BOOL bLock) override
     {
-        if (bLock)
-        {
-            DllAddRef();
-        }
-        else
-        {
-            DllRelease();
-        }
+        bLock ? DllAddRef() : DllRelease();
         return S_OK;
     }
 };
@@ -70,7 +48,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv)
 {
     *ppv = NULL;
 
-    if (rclsid == CSampleProvider::CLSID)
+    if (rclsid == CDefaultProvider::CLSID)
         return CreateInstance<CClassFactory>(riid, ppv);
 
     return CLASS_E_CLASSNOTAVAILABLE;

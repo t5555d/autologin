@@ -3,14 +3,14 @@
 
 void StringField::clean()
 {
-    auto raw = const_cast<wchar_t *>(m_value.c_str());
-    auto len = m_value.capacity() * sizeof(wchar_t);
+    auto raw = const_cast<wchar_t *>(value.c_str());
+    auto len = value.capacity() * sizeof(wchar_t);
     SecureZeroMemory(raw, len);
 }
 
 HRESULT CBaseCredential::GetFieldDescriptorCount(DWORD* count)
 {
-    *count = (DWORD) m_fields.size();
+    *count = (DWORD) fields.size();
     return S_OK;
 }
 

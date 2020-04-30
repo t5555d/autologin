@@ -6,10 +6,10 @@
 
 // forward references
 class CBaseCredential;
-class CSampleCredential;
+class CDefaultCredential;
 class CMessageCredential;
 
-class CSampleProvider : public CUnknown<ICredentialProvider>
+class CDefaultProvider : public CUnknown<ICredentialProvider>
 {
 public: // ICredentialProvider
 
@@ -29,13 +29,13 @@ public: // ICredentialProvider
 
 private:
 
-    friend HRESULT CreateInstance<CSampleProvider>(REFIID riid, void** ppv);
+    friend HRESULT CreateInstance<CDefaultProvider>(REFIID riid, void** ppv);
 
-    CSampleProvider() = default;
-    virtual ~CSampleProvider() { cleanup(); }
+    CDefaultProvider() = default;
+    virtual ~CDefaultProvider() { cleanup(); }
 
     void OnConnectStatusChanged();
-    static void OnConnectStatusChanged(CSampleProvider *self) {
+    static void OnConnectStatusChanged(CDefaultProvider *self) {
         self->OnConnectStatusChanged();
     }
 
@@ -44,11 +44,10 @@ private:
     CBaseCredential *getCredential();
 
 private:
-    RDPState                    _rdpState;
-    CSampleCredential           *_pCredential{}; // Our "connected" credential.
-    CMessageCredential          *_pMessageCredential{};   // Our "disconnected" credential.
-    ICredentialProviderEvents   *_pcpe{};                    // Used to tell our owner to re-enumerate credentials.
-    UINT_PTR                    _upAdviseContext{};       // Used to tell our owner who we are when asking to 
-                                                        // re-enumerate credentials.
-    CREDENTIAL_PROVIDER_USAGE_SCENARIO      _cpus{};
+    RDPState                    rdpState;
+    CDefaultCredential *        defaultCredential{}; // Our "connected" credential.
+    CMessageCredential *        messageCredential{}; // Our "disconnected" credential.
+    ICredentialProviderEvents * events{};
+    UINT_PTR                    eventsContext{};
+    CREDENTIAL_PROVIDER_USAGE_SCENARIO usage{};
 };

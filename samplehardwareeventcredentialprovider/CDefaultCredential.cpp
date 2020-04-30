@@ -5,12 +5,12 @@
 
 #include "helpers.h"
 
-#include "CSampleCredential.h"
-#include "CSampleProvider.h"
+#include "CDefaultCredential.h"
+#include "CDefaultProvider.h"
 
-HRESULT CSampleCredential::Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO usage)
+HRESULT CDefaultCredential::SetUsage(CREDENTIAL_PROVIDER_USAGE_SCENARIO value)
 {
-    m_usage = usage;
+    usage = value;
     return S_OK;
 }
 
@@ -20,16 +20,15 @@ HRESULT CSampleCredential::Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO usage)
 // field definitions.  But if you want to do something
 // more complicated, like change the contents of a field when the tile is
 // selected, you would do it here.
-HRESULT CSampleCredential::SetSelected(BOOL* pbAutoLogon)  
+HRESULT CDefaultCredential::SetSelected(BOOL* pbAutoLogon)  
 {
     *pbAutoLogon = TRUE;
     return S_OK;
 }
 
-// Collect the username and password into a serialized credential for the correct usage scenario 
-// (logon/unlock is what's demonstrated in this sample).  LogonUI then passes these credentials 
-// back to the system to log on.
-HRESULT CSampleCredential::GetSerialization(
+// Collect the username and password into a serialized credential for the correct usage scenario. 
+// LogonUI then passes these credentials back to the system to log on.
+HRESULT CDefaultCredential::GetSerialization(
     CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr,
     CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION* pcpcs, 
     PWSTR* ppwszOptionalStatusText, 
@@ -53,14 +52,14 @@ HRESULT CSampleCredential::GetSerialization(
     PWSTR password = nullptr;
     KERB_INTERACTIVE_UNLOCK_LOGON kiul;
 
-    HRESULT hr = SHStrDupW(m_username.GetValue(), &username);
+    HRESULT hr = SHStrDupW(usernameField.GetValue(), &username);
 
     if (SUCCEEDED(hr))
-        hr = ProtectIfNecessaryAndCopyPassword(m_password.GetValue(), m_usage, &password);
+        hr = ProtectIfNecessaryAndCopyPassword(passwordField.GetValue(), usage, &password);
 
     // Initialize kiul with weak references to our credential.
     if (SUCCEEDED(hr))
-        hr = KerbInteractiveUnlockLogonInit(domain, username, password, m_usage, &kiul);
+        hr = KerbInteractiveUnlockLogonInit(domain, username, password, usage, &kiul);
 
     // We use KERB_INTERACTIVE_UNLOCK_LOGON in both unlock and logon scenarios.  It contains a
     // KERB_INTERACTIVE_LOGON to hold the creds plus a LUID that is filled in for us by Winlogon
@@ -75,7 +74,7 @@ HRESULT CSampleCredential::GetSerialization(
         if (SUCCEEDED(hr))
         {
             pcpcs->ulAuthenticationPackage = ulAuthPackage;
-            pcpcs->clsidCredentialProvider = CSampleProvider::CLSID;
+            pcpcs->clsidCredentialProvider = CDefaultProvider::CLSID;
 
             // At this point the credential has created the serialized credential used for logon
             // By setting this to CPGSR_RETURN_CREDENTIAL_FINISHED we are letting logonUI know
@@ -109,7 +108,7 @@ static const REPORT_RESULT_STATUS_INFO s_rgLogonStatusInfo[] =
 // and the icon displayed in the case of a logon failure.  For example, we have chosen to 
 // customize the error shown in the case of bad username/password and in the case of the account
 // being disabled.
-HRESULT CSampleCredential::ReportResult(
+HRESULT CDefaultCredential::ReportResult(
     NTSTATUS ntsStatus, 
     NTSTATUS ntsSubstatus,
     PWSTR* ppwszOptionalStatusText, 

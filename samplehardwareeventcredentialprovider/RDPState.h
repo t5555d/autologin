@@ -9,22 +9,23 @@ class RDPState
 public:
     ~RDPState() { stop(); }
 
-    bool is_rdp_active() const { return m_rdp_peer != 0; }
-    DWORD get_rdp_addr() const { return m_rdp_peer; }
+    bool isActive() const { return peerAddr != 0; }
+    DWORD getPeerAddr() const { return peerAddr; }
+    DWORD getPeerPort() const { return peerPort; }
 
-    const char *get_rdp_text() const {
-        return m_rdp_peer ? m_rdp_text : nullptr;
+    const char *getPeerText() const {
+        return peerAddr ? peerText : nullptr;
     }
 
-    void set_interval(int interval) {
-        if (interval > 0) 
-            m_interval = interval;
+    void setInterval(int value) {
+        if (value > 0)
+            interval = value;
     }
 
     template<typename Context>
-    void set_callback(void (*callback)(Context *), Context *context) {
-        m_callback = reinterpret_cast<callback_t>(callback);
-        m_context = context;
+    void setCallback(void (*func)(Context *), Context *ctx) {
+        callback = reinterpret_cast<callback_t>(func);
+        context = ctx;
     }
 
     void start(int interval = 50);
@@ -33,14 +34,15 @@ public:
 private:
     using callback_t = void(*)(void *context);
 
-    MIB_TCPTABLE *  m_table = nullptr;
-    DWORD           m_table_size = 0;
-    DWORD           m_rdp_peer = 0;
-    char            m_rdp_text[16];
-    std::atomic_int m_interval = 0;
-    std::thread     m_thread;
-    callback_t      m_callback = nullptr;
-    void *          m_context = nullptr;
+    MIB_TCPTABLE *  table = nullptr;
+    DWORD           tableSize = 0;
+    DWORD           peerAddr = 0;
+    DWORD           peerPort = 0;
+    char            peerText[16];
+    std::atomic_int interval = 0;
+    std::thread     thread;
+    callback_t      callback = nullptr;
+    void *          context = nullptr;
 
     void watch();
 };

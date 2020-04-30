@@ -1,60 +1,62 @@
 #include "RDPState.h"
 #include <stdexcept>
 
-void RDPState::start(int interval)
+void RDPState::start(int watchInterval)
 {
-    if (m_interval == 0) {
-        m_interval = interval;
+    if (interval == 0) {
+        interval = watchInterval;
         std::thread new_thread(&RDPState::watch, this);
-        m_thread.swap(new_thread);
+        thread.swap(new_thread);
     }
     else {
-        set_interval(interval);
+        setInterval(interval);
     }
 }
 
 void RDPState::stop()
 {
-    m_interval = 0;
-    if (m_thread.joinable())
-        m_thread.join();
+    interval = 0;
+    if (thread.joinable())
+        thread.join();
 }
 
 void RDPState::watch()
 {
     const auto RDP_PORT = htons(3389);
 
-    while (m_interval > 0) {
-        auto res = GetTcpTable(m_table, &m_table_size, true);
+    while (interval > 0) {
+        auto res = GetTcpTable(table, &tableSize, true);
         if (res == ERROR_INSUFFICIENT_BUFFER) {
-            m_table = (decltype(m_table))realloc(m_table, m_table_size);
+            table = (decltype(table))realloc(table, tableSize);
             continue;
         }
 
         if (res == NO_ERROR) {
 
-            auto *table = m_table->table;
-            auto count = m_table->dwNumEntries;
+            auto tcp_table = table->table;
+            auto row_count = table->dwNumEntries;
 
-            DWORD rdp_peer = 0;
-            for (DWORD i = 0; i < count; i++) {
-                if (table[i].dwLocalPort == RDP_PORT && table[i].State == MIB_TCP_STATE_ESTAB) {
-                    rdp_peer = table[i].dwRemoteAddr;
+            DWORD new_addr = 0, new_port = 0;
+            for (DWORD i = 0; i < row_count; i++) {
+                if (tcp_table[i].dwLocalPort == RDP_PORT && tcp_table[i].dwState == MIB_TCP_STATE_ESTAB) {
+                    new_addr = tcp_table[i].dwRemoteAddr;
+                    new_port = tcp_table[i].dwRemotePort;
                     break;
                 }
             }
-            if (rdp_peer != m_rdp_peer) {
-                m_rdp_peer = rdp_peer;
+            if (new_addr != peerAddr || new_port != peerPort) {
+                peerAddr = new_addr;
+                peerPort = new_port;
 
-                snprintf(m_rdp_text, sizeof(m_rdp_text), "%d.%d.%d.%d",
-                    rdp_peer & 0xFF, (rdp_peer >> 8) & 0xFF, (rdp_peer >> 16) & 0xFF, (rdp_peer >> 24) & 0xFF);
+                snprintf(peerText, sizeof(peerText), "%d.%d.%d.%d",
+                    peerAddr & 0xFF, (peerAddr >> 8) & 0xFF, (peerAddr >> 16) & 0xFF, (peerAddr >> 24) & 0xFF);
 
-                if (m_callback)
-                    m_callback(m_context);
+                if (callback)
+                    callback(context);
             }
         }
 
-        Sleep(m_interval);
+        Sleep(interval);
     }
 }
 
