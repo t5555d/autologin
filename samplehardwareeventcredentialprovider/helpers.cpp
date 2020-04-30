@@ -12,7 +12,13 @@
 
 #include "helpers.h"
 #include <intsafe.h>
+#include <strsafe.h>
 #include <wincred.h>
+#include <shlwapi.h>
+
+#define SECURITY_WIN32
+#include <security.h>
+
 
 // 
 // Copies the field descriptor pointed to by rcpfd into a buffer allocated 

@@ -12,17 +12,6 @@
 #pragma once
 #include <credentialprovider.h>
 #include <ntsecapi.h>
-#define SECURITY_WIN32
-#include <security.h>
-#include <intsafe.h>
-
-#include <windows.h>
-#include <strsafe.h>
-
-#pragma warning(push)
-#pragma warning(disable : 4995)
-#include <shlwapi.h>
-#pragma warning(pop)
 
 //makes a copy of a field descriptor using CoTaskMemAlloc
 HRESULT FieldDescriptorCoAllocCopy(

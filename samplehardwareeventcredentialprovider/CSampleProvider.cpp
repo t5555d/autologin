@@ -17,27 +17,12 @@
 //
 
 #include <credentialprovider.h>
-#include "CSampleCredential.h"
 #include "CSampleProvider.h"
-#include "guid.h"
+#include "CSampleCredential.h"
+#include "MessageCredential.h"
 
-// CSampleProvider ////////////////////////////////////////////////////////
-
-CSampleProvider::CSampleProvider():
-    _cRef(1)
-{
-    DllAddRef();
-
-    _pcpe = NULL;
-    _pCredential = NULL;
-    _pMessageCredential = NULL;
-}
-
-CSampleProvider::~CSampleProvider()
-{
-    cleanup();
-    DllRelease();
-}
+const GUID CSampleProvider::CLSID =
+{ 0x75a22df0, 0xb81d, 0x46ed, { 0xb1, 0x19, 0xcd, 0x30, 0x50, 0x7b, 0xd6, 0x15 } };
 
 void CSampleProvider::cleanup()
 {

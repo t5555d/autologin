@@ -1,13 +1,9 @@
 #pragma once
 
-#include "common.h"
-#include "dll.h"
 #include <vector>
-#include <shlwapi.h>
-
-#define NOT_IMPLEMENTED override { return E_NOTIMPL; }
-
 #include <string>
+#include <credentialprovider.h>
+#include "CUnknown.h"
 
 class Field
 {
@@ -63,45 +59,8 @@ private:
     void clean();
 };
 
-class CBaseCredential : public ICredentialProviderCredential
+class CBaseCredential : public CUnknown<ICredentialProviderCredential>
 {
-    LONG _cRef;
-
-public:
-    CBaseCredential(): _cRef(1)
-    {
-        DllAddRef();
-        m_fields.reserve(16);
-    }
-    virtual ~CBaseCredential() { DllRelease(); }
-
-public: // IUnknown
-
-    ULONG STDMETHODCALLTYPE AddRef() override
-    {
-        return ++_cRef;
-    }
-
-    ULONG STDMETHODCALLTYPE Release() override
-    {
-        LONG cRef = --_cRef;
-        if (!cRef)
-        {
-            delete this;
-        }
-        return cRef;
-    }
-
-    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppv) override
-    {
-        static const QITAB qit[] =
-        {
-            QITABENT(CBaseCredential, ICredentialProviderCredential), // IID_ICredentialProviderCredential
-            {0},
-        };
-        return QISearch(this, qit, riid, ppv);
-    }
-
 public: // ICredentialProviderCredential default implementation for all field-related methods
 
     HRESULT GetFieldState(DWORD dwFieldID,
@@ -147,7 +106,8 @@ protected:
         m_fields[field.GetID()] = &field;
     }
 
-    Field *getField(DWORD id) {
+    Field *getField(DWORD id)
+    {
         if (id >= m_fields.size())
             return nullptr;
         return m_fields[id];

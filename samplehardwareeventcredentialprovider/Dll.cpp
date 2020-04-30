@@ -11,46 +11,32 @@
 #include <windows.h>
 #include <unknwn.h>
 #include <WinCred.h>
-#include "Dll.h"
-#include "helpers.h"
+#include "CUnknown.h"
+#include "CSampleProvider.h"
 
 static LONG g_cRef = 0;   // global dll reference count
 
-extern HRESULT CSample_CreateInstance(REFIID riid, void** ppv);
-EXTERN_C GUID CLSID_CSample;
-
-class CClassFactory : public IClassFactory
+void DllAddRef()
 {
-public:
-    CClassFactory() : _cRef(1) 
-    {
-    }
+    InterlockedIncrement(&g_cRef);
+}
 
-    // IUnknown
-    HRESULT QueryInterface(REFIID riid, void **ppv) override
-    {
-        static const QITAB qit[] = 
-        {
-            QITABENT(CClassFactory, IClassFactory),
-            { 0 },
-        };
-        return QISearch(this, qit, riid, ppv);
-    }
+void DllRelease()
+{
+    InterlockedDecrement(&g_cRef);
+}
 
-    ULONG AddRef() override
-    {
-        return InterlockedIncrement(&_cRef);
-    }
+STDAPI DllCanUnloadNow()
+{
+    return (g_cRef > 0) ? S_FALSE : S_OK;
+}
 
-    ULONG Release() override
-    {
-        LONG cRef = InterlockedDecrement(&_cRef);
-        if (!cRef)
-            delete this;
-        return cRef;
-    }
+extern HRESULT CSample_CreateInstance(REFIID riid, void** ppv);
 
-    // IClassFactory
+class CClassFactory : public CUnknown<IClassFactory>
+{
+public: // IClassFactory
+
     HRESULT CreateInstance(IUnknown* pUnkOuter, REFIID riid, void **ppv) override
     {
         HRESULT hr;
@@ -78,34 +64,13 @@ public:
         }
         return S_OK;
     }
-
-private:
-    ~CClassFactory()
-    {
-    }
-    long _cRef;
 };
-
-void DllAddRef()
-{
-    InterlockedIncrement(&g_cRef);
-}
-
-void DllRelease()
-{
-    InterlockedDecrement(&g_cRef);
-}
-
-STDAPI DllCanUnloadNow()
-{
-    return (g_cRef > 0) ? S_FALSE : S_OK;
-}
 
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv)
 {
     *ppv = NULL;
 
-    if (CLSID_CSample == rclsid)
+    if (rclsid == CSampleProvider::CLSID)
         return CreateInstance<CClassFactory>(riid, ppv);
 
     return CLASS_E_CLASSNOTAVAILABLE;

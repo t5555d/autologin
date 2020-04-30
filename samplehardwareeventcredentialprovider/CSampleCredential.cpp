@@ -1,21 +1,12 @@
-//
-// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-// PARTICULAR PURPOSE.
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//
-//
-
 #ifndef WIN32_NO_STATUS
 #include <ntstatus.h>
 #define WIN32_NO_STATUS
 #endif
 
-#include "CSampleCredential.h"
-#include "guid.h"
+#include "helpers.h"
 
+#include "CSampleCredential.h"
+#include "CSampleProvider.h"
 
 HRESULT CSampleCredential::Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO usage)
 {
@@ -84,7 +75,7 @@ HRESULT CSampleCredential::GetSerialization(
         if (SUCCEEDED(hr))
         {
             pcpcs->ulAuthenticationPackage = ulAuthPackage;
-            pcpcs->clsidCredentialProvider = CLSID_CSample;
+            pcpcs->clsidCredentialProvider = CSampleProvider::CLSID;
 
             // At this point the credential has created the serialized credential used for logon
             // By setting this to CPGSR_RETURN_CREDENTIAL_FINISHED we are letting logonUI know
@@ -102,9 +93,9 @@ HRESULT CSampleCredential::GetSerialization(
 
 struct REPORT_RESULT_STATUS_INFO
 {
-    NTSTATUS ntsStatus;
-    NTSTATUS ntsSubstatus;
-    PWSTR     pwzMessage;
+    NTSTATUS    ntsStatus;
+    NTSTATUS    ntsSubstatus;
+    PWSTR       pwzMessage;
     CREDENTIAL_PROVIDER_STATUS_ICON cpsi;
 };
 
