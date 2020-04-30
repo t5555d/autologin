@@ -17,7 +17,7 @@
 static LONG g_cRef = 0;   // global dll reference count
 HINSTANCE g_hinst = NULL; // global dll hinstance
 
-extern HRESULT CSample_CreateInstance(__in REFIID riid, __deref_out void** ppv);
+extern HRESULT CSample_CreateInstance(REFIID riid, void** ppv);
 EXTERN_C GUID CLSID_CSample;
 
 class CClassFactory : public IClassFactory
@@ -28,7 +28,7 @@ public:
     }
 
     // IUnknown
-    IFACEMETHODIMP QueryInterface(__in REFIID riid, __deref_out void **ppv)
+    HRESULT QueryInterface(REFIID riid, void **ppv) override
     {
         static const QITAB qit[] = 
         {
@@ -38,12 +38,12 @@ public:
         return QISearch(this, qit, riid, ppv);
     }
 
-    IFACEMETHODIMP_(ULONG) AddRef()
+    ULONG AddRef() override
     {
         return InterlockedIncrement(&_cRef);
     }
 
-    IFACEMETHODIMP_(ULONG) Release()
+    ULONG Release() override
     {
         LONG cRef = InterlockedDecrement(&_cRef);
         if (!cRef)
@@ -52,7 +52,7 @@ public:
     }
 
     // IClassFactory
-    IFACEMETHODIMP CreateInstance(__in IUnknown* pUnkOuter, __in REFIID riid, __deref_out void **ppv)
+    HRESULT CreateInstance(IUnknown* pUnkOuter, REFIID riid, void **ppv) override
     {
         HRESULT hr;
         if (!pUnkOuter)
@@ -67,7 +67,7 @@ public:
         return hr;
     }
 
-    IFACEMETHODIMP LockServer(__in BOOL bLock)
+    HRESULT LockServer(BOOL bLock) override
     {
         if (bLock)
         {
@@ -87,7 +87,7 @@ private:
     long _cRef;
 };
 
-HRESULT CClassFactory_CreateInstance(__in REFCLSID rclsid, __in REFIID riid, __deref_out void **ppv)
+HRESULT CClassFactory_CreateInstance(REFCLSID rclsid, REFIID riid, void **ppv)
 {
     *ppv = NULL;
 
@@ -128,12 +128,12 @@ STDAPI DllCanUnloadNow()
     return (g_cRef > 0) ? S_FALSE : S_OK;
 }
 
-STDAPI DllGetClassObject(__in REFCLSID rclsid, __in REFIID riid, __deref_out void** ppv)
+STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv)
 {
     return CClassFactory_CreateInstance(rclsid, riid, ppv);
 }
 
-STDAPI_(BOOL) DllMain(__in HINSTANCE hinstDll, __in DWORD dwReason, __in void *)
+STDAPI_(BOOL) DllMain(HINSTANCE hinstDll, DWORD dwReason, void *)
 {
     switch (dwReason)
     {

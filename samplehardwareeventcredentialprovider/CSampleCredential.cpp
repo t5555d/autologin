@@ -29,7 +29,7 @@ HRESULT CSampleCredential::Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO usage)
 // field definitions.  But if you want to do something
 // more complicated, like change the contents of a field when the tile is
 // selected, you would do it here.
-HRESULT CSampleCredential::SetSelected(__out BOOL* pbAutoLogon)  
+HRESULT CSampleCredential::SetSelected(BOOL* pbAutoLogon)  
 {
     *pbAutoLogon = TRUE;
     return S_OK;

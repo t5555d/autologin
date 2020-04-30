@@ -29,13 +29,13 @@ class CSampleCredential : public CBaseCredential
 {
 public: // ICredentialProviderCredential
 
-    IFACEMETHODIMP SetSelected(BOOL* pbAutoLogon) override;
+    HRESULT SetSelected(BOOL* pbAutoLogon) override;
 
-    IFACEMETHODIMP GetSerialization(CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr, 
+    HRESULT GetSerialization(CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr, 
                                     CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION* pcpcs, 
                                     PWSTR* ppwszOptionalStatusText, 
                                     CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon) override;
-    IFACEMETHODIMP ReportResult(NTSTATUS ntsStatus, 
+    HRESULT ReportResult(NTSTATUS ntsStatus, 
                                 NTSTATUS ntsSubstatus,
                                 PWSTR* ppwszOptionalStatusText, 
                                 CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon) override;

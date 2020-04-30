@@ -26,12 +26,12 @@ class CSampleProvider : public ICredentialProvider
 {
   public:
     // IUnknown
-    IFACEMETHODIMP_(ULONG) AddRef()
+    ULONG AddRef()
     {
         return ++_cRef;
     }
     
-    IFACEMETHODIMP_(ULONG) Release()
+    ULONG Release()
     {
         LONG cRef = --_cRef;
         if (!cRef)
@@ -41,7 +41,7 @@ class CSampleProvider : public ICredentialProvider
         return cRef;
     }
 
-    IFACEMETHODIMP QueryInterface(__in REFIID riid, __deref_out void** ppv)
+    HRESULT QueryInterface(REFIID riid, void** ppv)
     {
         static const QITAB qit[] =
         {
@@ -52,22 +52,19 @@ class CSampleProvider : public ICredentialProvider
     }
 
   public:
-    IFACEMETHODIMP SetUsageScenario(__in CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus, __in DWORD dwFlags);
-    IFACEMETHODIMP SetSerialization(__in const CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION *) { return E_NOTIMPL; }
+    HRESULT SetUsageScenario(CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus, DWORD dwFlags);
+    HRESULT SetSerialization(const CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION *) { return E_NOTIMPL; }
 
-    IFACEMETHODIMP Advise(__in ICredentialProviderEvents* pcpe, __in UINT_PTR upAdviseContext);
-    IFACEMETHODIMP UnAdvise();
+    HRESULT Advise(ICredentialProviderEvents* pcpe, UINT_PTR upAdviseContext);
+    HRESULT UnAdvise();
 
-    IFACEMETHODIMP GetFieldDescriptorCount(__out DWORD* pdwCount);
-    IFACEMETHODIMP GetFieldDescriptorAt(__in DWORD dwIndex,  __deref_out CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** ppcpfd);
+    HRESULT GetFieldDescriptorCount(DWORD* pdwCount);
+    HRESULT GetFieldDescriptorAt(DWORD dwIndex, CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** ppcpfd);
 
-    IFACEMETHODIMP GetCredentialCount(__out DWORD* pdwCount,
-                                      __out_range(<,*pdwCount) DWORD* pdwDefault,
-                                      __out BOOL* pbAutoLogonWithDefault);
-    IFACEMETHODIMP GetCredentialAt(__in DWORD dwIndex, 
-                                   __deref_out ICredentialProviderCredential** ppcpc);
+    HRESULT GetCredentialCount(DWORD* pdwCount, DWORD* pdwDefault, BOOL* pbAutoLogonWithDefault);
+    HRESULT GetCredentialAt(DWORD dwIndex, ICredentialProviderCredential** ppcpc);
 
-    friend HRESULT CSample_CreateInstance(__in REFIID riid, __deref_out void** ppv);
+    friend HRESULT CSample_CreateInstance(REFIID riid, void** ppv);
 
     void OnConnectStatusChanged();
 private:

@@ -92,7 +92,7 @@ public: // IUnknown
         return cRef;
     }
 
-    HRESULT STDMETHODCALLTYPE QueryInterface(__in REFIID riid, __deref_out void** ppv) override
+    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppv) override
     {
         static const QITAB qit[] =
         {

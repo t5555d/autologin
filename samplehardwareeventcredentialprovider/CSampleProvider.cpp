@@ -81,8 +81,8 @@ CBaseCredential *CSampleProvider::getCredential()
 // SetUsageScenario is the provider's cue that it's going to be asked for tiles
 // in a subsequent call.
 HRESULT CSampleProvider::SetUsageScenario(
-    __in CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus,
-    __in DWORD dwFlags
+    CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus,
+    DWORD dwFlags
 )
 {
     UNREFERENCED_PARAMETER(dwFlags);
@@ -153,8 +153,8 @@ HRESULT CSampleProvider::SetUsageScenario(
 // Called by LogonUI to give you a callback. Providers often use the callback if they
 // some event would cause them to need to change the set of tiles that they enumerated
 HRESULT CSampleProvider::Advise(
-    __in ICredentialProviderEvents* pcpe,
-    __in UINT_PTR upAdviseContext
+    ICredentialProviderEvents* pcpe,
+    UINT_PTR upAdviseContext
     )
 {
     UnAdvise();
@@ -187,10 +187,7 @@ HRESULT CSampleProvider::GetFieldDescriptorCount(DWORD* pdwCount)
 
 // Gets the field descriptor for a particular field. Note that we need to determine which
 // tile to use based on the "connected" status.
-HRESULT CSampleProvider::GetFieldDescriptorAt(
-    __in DWORD dwIndex, 
-    __deref_out CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc
-    )
+HRESULT CSampleProvider::GetFieldDescriptorAt(DWORD dwIndex, CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc)
 {
     auto cred = getCredential();
     return cred->GetFieldDescriptorAt(dwIndex, desc);
@@ -201,11 +198,7 @@ HRESULT CSampleProvider::GetFieldDescriptorAt(
 // different sets of credentials, we would provide a combobox in the "connected" tile so
 // that the user could pick which one they want to use.
 // The last cred prov used gets to select the default user tile
-HRESULT CSampleProvider::GetCredentialCount(
-    __out DWORD* pdwCount,
-    __out_range(<,*pdwCount) DWORD* pdwDefault,
-    __out BOOL* pbAutoLogonWithDefault
-    )
+HRESULT CSampleProvider::GetCredentialCount(DWORD* pdwCount, DWORD* pdwDefault, BOOL* pbAutoLogonWithDefault)
 {
     *pdwCount = 1;
     *pdwDefault = 0;
@@ -216,10 +209,7 @@ HRESULT CSampleProvider::GetCredentialCount(
 // Returns the credential at the index specified by dwIndex. This function is called
 // to enumerate the tiles. Note that we need to return the right credential, which depends
 // on whether we're connected or not.
-HRESULT CSampleProvider::GetCredentialAt(
-    __in DWORD dwIndex, 
-    __deref_out ICredentialProviderCredential** ppcpc
-    )
+HRESULT CSampleProvider::GetCredentialAt(DWORD dwIndex, ICredentialProviderCredential** ppcpc)
 {
     if (dwIndex != 0 || !ppcpc)
         return E_INVALIDARG;
@@ -229,7 +219,7 @@ HRESULT CSampleProvider::GetCredentialAt(
 }
 
 // Boilerplate method to create an instance of our provider. 
-HRESULT CSample_CreateInstance(__in REFIID riid, __in void** ppv)
+HRESULT CSample_CreateInstance(REFIID riid, void** ppv)
 {
     try
     {
