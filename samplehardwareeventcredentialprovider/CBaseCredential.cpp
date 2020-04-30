@@ -1,6 +1,13 @@
 #include "CBaseCredential.h"
 #include "helpers.h"
 
+void StringField::clean()
+{
+    auto raw = const_cast<wchar_t *>(m_value.c_str());
+    auto len = m_value.capacity() * sizeof(wchar_t);
+    SecureZeroMemory(raw, len);
+}
+
 HRESULT CBaseCredential::GetFieldDescriptorCount(DWORD* count)
 {
     *count = (DWORD) m_fields.size();
@@ -9,13 +16,17 @@ HRESULT CBaseCredential::GetFieldDescriptorCount(DWORD* count)
 
 HRESULT CBaseCredential::GetFieldDescriptorAt(
     DWORD dwFieldID,
-    CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc)
+    CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** pdesc)
 {
     auto field = getField(dwFieldID);
     if (!field)
         return E_INVALIDARG;
 
-    return FieldDescriptorCoAllocCopy(field->GetDescriptor(), desc);
+    CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR desc = { 0 };
+    desc.dwFieldID = field->GetID();
+    desc.cpft = field->GetType();
+
+    return FieldDescriptorCoAllocCopy(desc, pdesc);
 }
 
 // Get info for a particular field of a tile. Called by logonUI to get information to 
@@ -34,7 +45,6 @@ HRESULT CBaseCredential::GetFieldState(
     *state = field->GetState();
     return S_OK;
 }
-
 
 HRESULT CBaseCredential::GetStringValue(DWORD dwFieldID, PWSTR* value)
 {

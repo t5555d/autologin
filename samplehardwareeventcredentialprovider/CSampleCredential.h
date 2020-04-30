@@ -17,7 +17,6 @@
 
 #include <helpers.h>
 #include "CBaseCredential.h"
-#include "fields.h"
 
 enum SAMPLE_FIELD_ID
 {

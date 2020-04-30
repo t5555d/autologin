@@ -15,7 +15,6 @@
 #include <shlguid.h>
 #include "helpers.h"
 #include "CBaseCredential.h"
-#include "fields.h"
 
 enum SAMPLE_MESSAGE_FIELD_ID
 {
