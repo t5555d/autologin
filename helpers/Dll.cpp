@@ -15,7 +15,6 @@
 #include "helpers.h"
 
 static LONG g_cRef = 0;   // global dll reference count
-HINSTANCE g_hinst = NULL; // global dll hinstance
 
 extern HRESULT CSample_CreateInstance(REFIID riid, void** ppv);
 EXTERN_C GUID CLSID_CSample;
@@ -146,7 +145,6 @@ STDAPI_(BOOL) DllMain(HINSTANCE hinstDll, DWORD dwReason, void *)
         break;
     }
     
-    g_hinst = hinstDll;
     return TRUE;
 }
 
