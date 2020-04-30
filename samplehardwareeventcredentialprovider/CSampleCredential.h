@@ -21,6 +21,7 @@
 
 enum SAMPLE_FIELD_ID
 {
+    SFI_TITLE,
     SFI_USERNAME,
     SFI_PASSWORD,
     SFI_NUM_FIELDS
@@ -28,15 +29,9 @@ enum SAMPLE_FIELD_ID
 
 class CSampleCredential : public CBaseCredential
 {
-public:
-    // ICredentialProviderCredential
+public: // ICredentialProviderCredential
+
     IFACEMETHODIMP SetSelected(BOOL* pbAutoLogon) override;
-
-    IFACEMETHODIMP GetFieldState(DWORD dwFieldID,
-                                 CREDENTIAL_PROVIDER_FIELD_STATE* pcpfs,
-                                 CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis) override;
-
-    IFACEMETHODIMP GetStringValue(DWORD dwFieldID, PWSTR* ppwsz) override;
 
     IFACEMETHODIMP GetSerialization(CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr, 
                                     CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION* pcpcs, 
@@ -50,13 +45,17 @@ public:
 public:
     HRESULT Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO usage);
 
-    HRESULT GetFieldDescriptorAt(DWORD dwIndex, CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc);
+    CSampleCredential()
+    {
+        m_fields.push_back(&m_title);
+        m_fields.push_back(&m_username);
+        m_fields.push_back(&m_password);
+    }
 
 private:
     CREDENTIAL_PROVIDER_USAGE_SCENARIO    m_usage; // The usage scenario for which we were enumerated.
-    StringField                           m_fields[SFI_NUM_FIELDS]
-    {
-        { SFI_USERNAME, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_BOTH, CPFIS_NONE },
-        { SFI_PASSWORD, CPFT_PASSWORD_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_DISABLED },
-    };
+
+    StringField m_title{ SFI_TITLE, CPFT_SMALL_TEXT, CPFS_DISPLAY_IN_BOTH, CPFIS_NONE };
+    StringField m_username{ SFI_USERNAME, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_NONE };
+    StringField m_password{ SFI_PASSWORD, CPFT_PASSWORD_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_FOCUSED };
 };

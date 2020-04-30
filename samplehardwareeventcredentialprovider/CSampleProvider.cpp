@@ -49,10 +49,10 @@ CSampleProvider::~CSampleProvider()
 void CSampleProvider::OnConnectStatusChanged()
 {
     if (_rdpState.is_rdp_active()) {
-        _pMessageCredential->SetText(SMFI_MESSAGE, L"Auto-login is off, due to active RDP connection with %S", _rdpState.get_rdp_text());
+        _pMessageCredential->FormatStringValue(SMFI_MESSAGE, L"Auto-login is off, due to active RDP connection with %S", _rdpState.get_rdp_text());
     }
     else {
-        _pMessageCredential->SetText(SMFI_MESSAGE, L"Auto-login is on");
+        _pMessageCredential->SetStringValue(SMFI_MESSAGE, L"Auto-login is on");
     }
 
     if (_pcpe != NULL)
@@ -102,7 +102,7 @@ HRESULT CSampleProvider::SetUsageScenario(
         if (SUCCEEDED(hr) && !_pMessageCredential)
         {
             _pMessageCredential = new CMessageCredential();
-            _pMessageCredential->SetText(SMFI_TITLE, L"Auto-login");
+            _pMessageCredential->SetStringValue(SMFI_TITLE, L"Auto-login");
         }
 
         if (SUCCEEDED(hr))

@@ -23,23 +23,12 @@ HRESULT CSampleCredential::Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO usage)
 {
     m_usage = usage;
 
-    m_fields[SFI_USERNAME].SetValue(L"testbot");
-    m_fields[SFI_PASSWORD].SetValue(L"Test1234");
+    m_title.SetValue(L"Auto-login");
+    m_username.SetValue(L"testbot");
+    m_password.SetValue(L"Test1234");
 
     return S_OK;
 }
-
-HRESULT CSampleCredential::GetFieldDescriptorAt(
-    DWORD dwIndex,
-    CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc)
-{
-    if (dwIndex < SFI_NUM_FIELDS)
-        return FieldDescriptorCoAllocCopy(m_fields[dwIndex].GetDescriptor(), desc);
-    else
-        return E_INVALIDARG;
-}
-
-
 
 // LogonUI calls this function when our tile is selected (zoomed)
 // If you simply want fields to show/hide based on the selected state,
@@ -51,45 +40,6 @@ HRESULT CSampleCredential::SetSelected(__out BOOL* pbAutoLogon)
 {
     *pbAutoLogon = TRUE;
     return S_OK;
-}
-
-// Get info for a particular field of a tile. Called by logonUI to get information to 
-// display the tile.
-HRESULT CSampleCredential::GetFieldState(
-    DWORD dwFieldID,
-    CREDENTIAL_PROVIDER_FIELD_STATE* place,
-    CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* state
-    )
-{
-    if (dwFieldID < SFI_NUM_FIELDS && place && state)
-    {
-        *state = m_fields[dwFieldID].GetState();
-        *place = m_fields[dwFieldID].GetPlace();
-
-        return S_OK;
-    }
-    else
-    {
-        return E_INVALIDARG;
-    }
-}
-
-// Sets ppwsz to the string value of the field at the index dwFieldID.
-HRESULT CSampleCredential::GetStringValue(
-    DWORD dwFieldID, 
-    __deref_out PWSTR* value
-    )
-{
-    if (dwFieldID < SFI_NUM_FIELDS && value)
-    {
-        // Make a copy of the string and return that. The caller
-        // is responsible for freeing it.
-        return SHStrDupW(m_fields[dwFieldID].GetValue(), value);
-    }
-    else
-    {
-        return E_INVALIDARG;
-    }
 }
 
 // Collect the username and password into a serialized credential for the correct usage scenario 
@@ -119,10 +69,10 @@ HRESULT CSampleCredential::GetSerialization(
     PWSTR password = nullptr;
     KERB_INTERACTIVE_UNLOCK_LOGON kiul;
 
-    HRESULT hr = SHStrDupW(m_fields[SFI_USERNAME].GetValue(), &username);
+    HRESULT hr = SHStrDupW(m_username.GetValue(), &username);
 
     if (SUCCEEDED(hr))
-        hr = ProtectIfNecessaryAndCopyPassword(m_fields[SFI_PASSWORD].GetValue(), m_usage, &password);
+        hr = ProtectIfNecessaryAndCopyPassword(m_password.GetValue(), m_usage, &password);
 
     // Initialize kiul with weak references to our credential.
     if (SUCCEEDED(hr))

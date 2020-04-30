@@ -13,7 +13,11 @@ class CBaseCredential : public ICredentialProviderCredential
     LONG _cRef;
 
 public:
-    CBaseCredential(): _cRef(1) { DllAddRef(); }
+    CBaseCredential(): _cRef(1)
+    {
+        DllAddRef();
+        m_fields.reserve(16);
+    }
     virtual ~CBaseCredential() { DllRelease(); }
 
 public: // IUnknown
@@ -79,5 +83,5 @@ public:
     HRESULT GetFieldDescriptorAt(DWORD dwIndex, CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc);
 
 protected:
-    std::vector<Field *> m_fields{ 10 };
+    std::vector<Field *> m_fields;
 };

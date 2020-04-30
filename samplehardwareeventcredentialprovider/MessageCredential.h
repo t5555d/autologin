@@ -28,25 +28,20 @@ class CMessageCredential : public CBaseCredential
 {
 public: // ICredentialProviderCredential
 
-    IFACEMETHODIMP GetFieldState(DWORD dwFieldID,
-        CREDENTIAL_PROVIDER_FIELD_STATE* pcpfs,
-        CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis) override;
-
-    IFACEMETHODIMP GetStringValue(DWORD dwFieldID, PWSTR* ppwsz) override;
-
     IFACEMETHODIMP GetSerialization(CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE*,
         CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION*,
         PWSTR*, CREDENTIAL_PROVIDER_STATUS_ICON*) NOT_IMPLEMENTED;
 
 public:
-    HRESULT SetText(DWORD dwFieldId, LPCWSTR fmt, ...);
 
-    HRESULT GetFieldDescriptorAt(DWORD dwIndex, CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc);
+    CMessageCredential()
+    {
+        m_fields.push_back(&m_title);
+        m_fields.push_back(&m_message);
+    }
 
 private:
-    StringField m_fields[SMFI_NUM_FIELDS]
-    {
-        { SMFI_TITLE, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_BOTH },
-        { SMFI_MESSAGE, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE },
-    };
+
+    StringField m_title{ SMFI_TITLE, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_BOTH };
+    StringField m_message{ SMFI_MESSAGE, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE };
 };
