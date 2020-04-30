@@ -64,7 +64,7 @@ class CSampleProvider : public ICredentialProvider
     HRESULT GetCredentialCount(DWORD* pdwCount, DWORD* pdwDefault, BOOL* pbAutoLogonWithDefault);
     HRESULT GetCredentialAt(DWORD dwIndex, ICredentialProviderCredential** ppcpc);
 
-    friend HRESULT CSample_CreateInstance(REFIID riid, void** ppv);
+    friend HRESULT CreateInstance<CSampleProvider>(REFIID riid, void** ppv);
 
     void OnConnectStatusChanged();
 private:

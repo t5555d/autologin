@@ -86,32 +86,6 @@ private:
     long _cRef;
 };
 
-HRESULT CClassFactory_CreateInstance(REFCLSID rclsid, REFIID riid, void **ppv)
-{
-    *ppv = NULL;
-
-    HRESULT hr;
-
-    if (CLSID_CSample == rclsid)
-    {
-        CClassFactory* pcf = new CClassFactory();
-        if (pcf)
-        {
-            hr = pcf->QueryInterface(riid, ppv);
-            pcf->Release();
-        }
-        else
-        {
-            hr = E_OUTOFMEMORY;
-        }
-    }
-    else
-    {
-        hr = CLASS_E_CLASSNOTAVAILABLE;
-    }
-    return hr;
-}
-
 void DllAddRef()
 {
     InterlockedIncrement(&g_cRef);
@@ -129,7 +103,12 @@ STDAPI DllCanUnloadNow()
 
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv)
 {
-    return CClassFactory_CreateInstance(rclsid, riid, ppv);
+    *ppv = NULL;
+
+    if (CLSID_CSample == rclsid)
+        return CreateInstance<CClassFactory>(riid, ppv);
+
+    return CLASS_E_CLASSNOTAVAILABLE;
 }
 
 STDAPI_(BOOL) DllMain(HINSTANCE hinstDll, DWORD dwReason, void *)

@@ -221,15 +221,5 @@ HRESULT CSampleProvider::GetCredentialAt(DWORD dwIndex, ICredentialProviderCrede
 // Boilerplate method to create an instance of our provider. 
 HRESULT CSample_CreateInstance(REFIID riid, void** ppv)
 {
-    try
-    {
-        CSampleProvider* pProvider = new CSampleProvider();
-        HRESULT hr = pProvider->QueryInterface(riid, ppv);
-        pProvider->Release();
-        return hr;
-    }
-    catch (const std::bad_alloc&)
-    {
-        return E_OUTOFMEMORY;
-    }
+    return CreateInstance<CSampleProvider>(riid, ppv);
 }
