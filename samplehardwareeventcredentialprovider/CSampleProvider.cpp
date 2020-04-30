@@ -35,13 +35,22 @@ CSampleProvider::CSampleProvider():
 
 CSampleProvider::~CSampleProvider()
 {
-    if (_pCredential != NULL)
+    cleanup();
+    DllRelease();
+}
+
+void CSampleProvider::cleanup()
+{
+    if (_pCredential)
     {
         _pCredential->Release();
         _pCredential = NULL;
     }
-
-    DllRelease();
+    if (_pMessageCredential)
+    {
+        _pMessageCredential->Release();
+        _pMessageCredential = NULL;
+    }
 }
 
 // This method acts as a callback for the hardware emulator. When it's called, it simply
@@ -61,6 +70,14 @@ void CSampleProvider::OnConnectStatusChanged()
     }
 }
 
+CBaseCredential *CSampleProvider::getCredential()
+{
+    if (_rdpState.is_rdp_active())
+        return _pMessageCredential;
+    else
+        return _pCredential;
+}
+
 // SetUsageScenario is the provider's cue that it's going to be asked for tiles
 // in a subsequent call.
 HRESULT CSampleProvider::SetUsageScenario(
@@ -76,8 +93,6 @@ HRESULT CSampleProvider::SetUsageScenario(
     {
     case CPUS_LOGON:
     case CPUS_UNLOCK_WORKSTATION:
-        break;
-
     case CPUS_CREDUI:
         break;
 
@@ -93,17 +108,30 @@ HRESULT CSampleProvider::SetUsageScenario(
     _cpus = cpus;
 
     try {
+        auto title = L"Auto-login";
+        auto username = L"testbot";
+        auto password = L"Test1234";
+
         if (SUCCEEDED(hr) && !_pCredential)
-        {
             _pCredential = new CSampleCredential();
+
+        if (SUCCEEDED(hr))
             hr = _pCredential->Initialize(_cpus);
-        }
+
+        if (SUCCEEDED(hr))
+            hr = _pCredential->SetStringValue(SFI_TITLE, title);
+
+        if (SUCCEEDED(hr))
+            hr = _pCredential->SetStringValue(SFI_USERNAME, username);
+
+        if (SUCCEEDED(hr))
+            hr = _pCredential->SetStringValue(SFI_PASSWORD, password);
 
         if (SUCCEEDED(hr) && !_pMessageCredential)
-        {
             _pMessageCredential = new CMessageCredential();
-            _pMessageCredential->SetStringValue(SMFI_TITLE, L"Auto-login");
-        }
+
+        if (SUCCEEDED(hr))
+            hr = _pMessageCredential->SetStringValue(SMFI_TITLE, title);
 
         if (SUCCEEDED(hr))
         {
@@ -116,20 +144,8 @@ HRESULT CSampleProvider::SetUsageScenario(
         hr = E_OUTOFMEMORY;
     }
 
-    // If anything failed, clean up.
     if (FAILED(hr))
-    {
-        if (_pCredential != NULL)
-        {
-            _pCredential->Release();
-            _pCredential = NULL;
-        }
-        if (_pMessageCredential != NULL)
-        {
-            _pMessageCredential->Release();
-            _pMessageCredential = NULL;
-        }
-    }
+        cleanup();
 
     return hr;
 }
@@ -141,10 +157,7 @@ HRESULT CSampleProvider::Advise(
     __in UINT_PTR upAdviseContext
     )
 {
-    if (_pcpe != NULL)
-    {
-        _pcpe->Release();
-    }
+    UnAdvise();
     _pcpe = pcpe;
     _pcpe->AddRef();
     _upAdviseContext = upAdviseContext;
@@ -166,10 +179,10 @@ HRESULT CSampleProvider::UnAdvise()
 // of fields to be displayed on our active tile, which depends on our connected state. The
 // "connected" CSampleCredential has SFI_NUM_FIELDS fields, whereas the "disconnected" 
 // CMessageCredential has SMFI_NUM_FIELDS fields.
-HRESULT CSampleProvider::GetFieldDescriptorCount(__out DWORD* pdwCount)
+HRESULT CSampleProvider::GetFieldDescriptorCount(DWORD* pdwCount)
 {
-    *pdwCount = _rdpState.is_rdp_active() ? SMFI_NUM_FIELDS : SFI_NUM_FIELDS;
-    return S_OK;
+    auto cred = getCredential();
+    return cred->GetFieldDescriptorCount(pdwCount);
 }
 
 // Gets the field descriptor for a particular field. Note that we need to determine which
@@ -179,10 +192,8 @@ HRESULT CSampleProvider::GetFieldDescriptorAt(
     __deref_out CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc
     )
 {
-    if (!_rdpState.is_rdp_active())
-        return _pCredential->GetFieldDescriptorAt(dwIndex, desc);
-    else
-        return _pMessageCredential->GetFieldDescriptorAt(dwIndex, desc);
+    auto cred = getCredential();
+    return cred->GetFieldDescriptorAt(dwIndex, desc);
 }
 
 // We only use one tile at any given time since the system can either be "connected" or 
@@ -210,43 +221,25 @@ HRESULT CSampleProvider::GetCredentialAt(
     __deref_out ICredentialProviderCredential** ppcpc
     )
 {
-    HRESULT hr;
-    // Make sure the parameters are valid.
-    if ((dwIndex == 0) && ppcpc)
-    {
-        if (!_rdpState.is_rdp_active())
-        {
-            hr = _pCredential->QueryInterface(IID_ICredentialProviderCredential, reinterpret_cast<void**>(ppcpc));
-        }
-        else
-        {
-            hr = _pMessageCredential->QueryInterface(IID_ICredentialProviderCredential, reinterpret_cast<void**>(ppcpc));
-        }
-    }
-    else
-    {
-        hr = E_INVALIDARG;
-    }
-        
-    return hr;
+    if (dwIndex != 0 || !ppcpc)
+        return E_INVALIDARG;
+
+    auto cred = getCredential();
+    return cred->QueryInterface(IID_ICredentialProviderCredential, reinterpret_cast<void**>(ppcpc));
 }
 
 // Boilerplate method to create an instance of our provider. 
 HRESULT CSample_CreateInstance(__in REFIID riid, __in void** ppv)
 {
-    HRESULT hr;
-
-    CSampleProvider* pProvider = new CSampleProvider();
-
-    if (pProvider)
+    try
     {
-        hr = pProvider->QueryInterface(riid, ppv);
+        CSampleProvider* pProvider = new CSampleProvider();
+        HRESULT hr = pProvider->QueryInterface(riid, ppv);
         pProvider->Release();
+        return hr;
     }
-    else
+    catch (const std::bad_alloc&)
     {
-        hr = E_OUTOFMEMORY;
+        return E_OUTOFMEMORY;
     }
-    
-    return hr;
 }

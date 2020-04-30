@@ -1,14 +1,21 @@
 #include "CBaseCredential.h"
 #include "helpers.h"
 
+HRESULT CBaseCredential::GetFieldDescriptorCount(DWORD* count)
+{
+    *count = (DWORD) m_fields.size();
+    return S_OK;
+}
+
 HRESULT CBaseCredential::GetFieldDescriptorAt(
-    DWORD dwIndex,
+    DWORD dwFieldID,
     CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc)
 {
-    if (dwIndex < m_fields.size())
-        return FieldDescriptorCoAllocCopy(m_fields[dwIndex]->GetDescriptor(), desc);
-    else
+    auto field = getField(dwFieldID);
+    if (!field)
         return E_INVALIDARG;
+
+    return FieldDescriptorCoAllocCopy(field->GetDescriptor(), desc);
 }
 
 // Get info for a particular field of a tile. Called by logonUI to get information to 
@@ -19,21 +26,23 @@ HRESULT CBaseCredential::GetFieldState(
     CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* state
 )
 {
-    if (dwFieldID >= m_fields.size() || !place || !state)
+    auto field = getField(dwFieldID);
+    if (!field || !place || !state)
         return E_INVALIDARG;
 
-    *place = m_fields[dwFieldID]->GetPlace();
-    *state = m_fields[dwFieldID]->GetState();
+    *place = field->GetPlace();
+    *state = field->GetState();
     return S_OK;
 }
 
 
 HRESULT CBaseCredential::GetStringValue(DWORD dwFieldID, PWSTR* value)
 {
-    if (dwFieldID >= m_fields.size() || !value)
+    auto field = getField(dwFieldID);
+    if (!field || !value)
         return E_INVALIDARG;
 
-    auto string = static_cast<StringField *>(m_fields[dwFieldID]);
+    auto string = dynamic_cast<StringField *>(field);
     if (!string)
         return E_NOINTERFACE;
 
@@ -44,10 +53,11 @@ HRESULT CBaseCredential::GetStringValue(DWORD dwFieldID, PWSTR* value)
 
 HRESULT CBaseCredential::SetStringValue(DWORD dwFieldID, PCWSTR value)
 {
-    if (dwFieldID >= m_fields.size() || !value)
+    auto field = getField(dwFieldID);
+    if (!field || !value)
         return E_INVALIDARG;
 
-    auto string = static_cast<StringField *>(m_fields[dwFieldID]);
+    auto string = dynamic_cast<StringField *>(field);
     if (!string)
         return E_NOINTERFACE;
 
@@ -57,8 +67,13 @@ HRESULT CBaseCredential::SetStringValue(DWORD dwFieldID, PCWSTR value)
 
 HRESULT CBaseCredential::FormatStringValue(DWORD dwFieldID, PCWSTR format, ...)
 {
-    if (dwFieldID >= m_fields.size() || !format)
+    auto field = getField(dwFieldID);
+    if (!field || !format)
         return E_INVALIDARG;
+
+    auto string = dynamic_cast<StringField *>(field);
+    if (!string)
+        return E_NOINTERFACE;
 
     va_list va;
     va_start(va, format);
@@ -69,5 +84,6 @@ HRESULT CBaseCredential::FormatStringValue(DWORD dwFieldID, PCWSTR format, ...)
     wvnsprintf(value, BUF_SIZE, format, va);
     va_end(va);
 
-    return SetStringValue(dwFieldID, value);
+    string->SetValue(value);
+    return S_OK;
 }

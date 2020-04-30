@@ -17,16 +17,9 @@
 #include "guid.h"
 
 
-// Initializes one credential with the field information passed in.
-// Set the value of the SFI_USERNAME field to pwzUsername.
 HRESULT CSampleCredential::Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO usage)
 {
     m_usage = usage;
-
-    m_title.SetValue(L"Auto-login");
-    m_username.SetValue(L"testbot");
-    m_password.SetValue(L"Test1234");
-
     return S_OK;
 }
 

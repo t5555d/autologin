@@ -20,8 +20,7 @@
 enum SAMPLE_MESSAGE_FIELD_ID
 {
     SMFI_TITLE,
-    SMFI_MESSAGE,
-    SMFI_NUM_FIELDS
+    SMFI_MESSAGE
 };
 
 class CMessageCredential : public CBaseCredential
@@ -36,8 +35,8 @@ public:
 
     CMessageCredential()
     {
-        m_fields.push_back(&m_title);
-        m_fields.push_back(&m_message);
+        registerField(m_title);
+        registerField(m_message);
     }
 
 private:

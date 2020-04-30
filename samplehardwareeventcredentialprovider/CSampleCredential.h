@@ -23,8 +23,7 @@ enum SAMPLE_FIELD_ID
 {
     SFI_TITLE,
     SFI_USERNAME,
-    SFI_PASSWORD,
-    SFI_NUM_FIELDS
+    SFI_PASSWORD
 };
 
 class CSampleCredential : public CBaseCredential
@@ -47,9 +46,9 @@ public:
 
     CSampleCredential()
     {
-        m_fields.push_back(&m_title);
-        m_fields.push_back(&m_username);
-        m_fields.push_back(&m_password);
+        registerField(m_title);
+        registerField(m_username);
+        registerField(m_password);
     }
 
 private:

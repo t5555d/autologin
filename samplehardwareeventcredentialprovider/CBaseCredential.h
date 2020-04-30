@@ -81,7 +81,23 @@ public: // ICredentialProviderCredential default implementation for other option
 public:
 
     HRESULT GetFieldDescriptorAt(DWORD dwIndex, CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc);
-
+    HRESULT GetFieldDescriptorCount(DWORD* pdwCount);
+    
 protected:
+    void registerField(Field& field)
+    {
+        size_t min_size = field.GetID() + 1;
+        if (m_fields.size() < min_size)
+            m_fields.resize(min_size);
+        m_fields[field.GetID()] = &field;
+    }
+
+    Field *getField(DWORD id) {
+        if (id >= m_fields.size())
+            return nullptr;
+        return m_fields[id];
+    }
+
+private:
     std::vector<Field *> m_fields;
 };

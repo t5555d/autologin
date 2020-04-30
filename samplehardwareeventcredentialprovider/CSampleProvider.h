@@ -70,14 +70,18 @@ class CSampleProvider : public ICredentialProvider
     friend HRESULT CSample_CreateInstance(__in REFIID riid, __deref_out void** ppv);
 
     void OnConnectStatusChanged();
-protected:
+private:
 
     CSampleProvider();
-    __override ~CSampleProvider();
+    virtual ~CSampleProvider();
 
     static void OnConnectStatusChanged(CSampleProvider *self) {
         self->OnConnectStatusChanged();
     }
+
+    void cleanup();
+
+    CBaseCredential *getCredential();
 
 private:
     LONG                        _cRef;                  // Reference counter.
