@@ -79,6 +79,8 @@ HRESULT CSampleProvider::SetUsageScenario(
         break;
 
     case CPUS_CREDUI:
+        break;
+
     case CPUS_CHANGE_PASSWORD:
         return E_NOTIMPL;
 

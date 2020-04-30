@@ -1,4 +1,5 @@
 #include "RDPState.h"
+#include <stdexcept>
 
 void RDPState::start(int interval)
 {
@@ -15,14 +16,15 @@ void RDPState::start(int interval)
 void RDPState::stop()
 {
     m_interval = 0;
-    m_thread.join();
+    if (m_thread.joinable())
+        m_thread.join();
 }
 
 void RDPState::watch()
 {
     const auto RDP_PORT = htons(3389);
 
-    while (m_interval >= 0) {
+    while (m_interval > 0) {
         auto res = GetTcpTable(m_table, &m_table_size, true);
         if (res == ERROR_INSUFFICIENT_BUFFER) {
             m_table = (decltype(m_table))realloc(m_table, m_table_size);
