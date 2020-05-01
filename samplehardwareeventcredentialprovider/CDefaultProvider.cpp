@@ -24,22 +24,20 @@ void CDefaultProvider::cleanup()
 // tells the infrastructure that it needs to re-enumerate the credentials.
 void CDefaultProvider::OnConnectStatusChanged()
 {
-    if (rdpState.isActive()) {
+    if (!defaultCredential->isAutoLogonEnabled())
+        messageCredential->SetStringValue(MSG_MESSAGE, L"Auto-login is disabled in registry");
+    else if (rdpState.isActive())
         messageCredential->FormatStringValue(MSG_MESSAGE, L"Auto-login is off, due to active RDP connection with %S", rdpState.getPeerText());
-    }
-    else {
+    else
         messageCredential->SetStringValue(MSG_MESSAGE, L"Auto-login is on");
-    }
 
     if (events != NULL)
-    {
         events->CredentialsChanged(eventsContext);
-    }
 }
 
 CBaseCredential *CDefaultProvider::getCredential()
 {
-    if (rdpState.isActive())
+    if (rdpState.isActive() || !defaultCredential->isAutoLogonEnabled())
         return messageCredential;
     else
         return defaultCredential;
@@ -76,23 +74,15 @@ HRESULT CDefaultProvider::SetUsageScenario(
 
     try {
         auto title = L"Auto-login";
-        auto username = L"testbot";
-        auto password = L"Test1234";
 
         if (SUCCEEDED(hr) && !defaultCredential)
             defaultCredential = new CDefaultCredential();
 
         if (SUCCEEDED(hr))
-            hr = defaultCredential->SetUsage(usage);
+            hr = defaultCredential->Initialize(usage);
 
         if (SUCCEEDED(hr))
             hr = defaultCredential->SetStringValue(AUTO_TITLE, title);
-
-        if (SUCCEEDED(hr))
-            hr = defaultCredential->SetStringValue(AUTO_USERNAME, username);
-
-        if (SUCCEEDED(hr))
-            hr = defaultCredential->SetStringValue(AUTO_PASSWORD, password);
 
         if (SUCCEEDED(hr) && !messageCredential)
             messageCredential = new CMessageCredential();

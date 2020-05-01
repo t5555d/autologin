@@ -33,11 +33,14 @@ public:
         registerField(passwordField);
     }
 
-    HRESULT SetUsage(CREDENTIAL_PROVIDER_USAGE_SCENARIO usage);
+    HRESULT Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO usage);
+
+    bool isAutoLogonEnabled() const { return autoLogon != 0; }
 
 private:
     CREDENTIAL_PROVIDER_USAGE_SCENARIO usage; // The usage scenario for which we were enumerated.
 
+    BOOL        autoLogon = FALSE;
     StringField titleField{ AUTO_TITLE, CPFT_SMALL_TEXT, CPFS_DISPLAY_IN_BOTH, CPFIS_NONE };
     StringField usernameField{ AUTO_USERNAME, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_NONE };
     StringField passwordField{ AUTO_PASSWORD, CPFT_PASSWORD_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_FOCUSED };

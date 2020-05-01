@@ -8,9 +8,75 @@
 #include "CDefaultCredential.h"
 #include "CDefaultProvider.h"
 
-HRESULT CDefaultCredential::SetUsage(CREDENTIAL_PROVIDER_USAGE_SCENARIO value)
+HRESULT getPrivatePassword(StringField& field)
+{
+    LSA_OBJECT_ATTRIBUTES attr{};
+    LSA_HANDLE policy;
+
+    NTSTATUS status = LsaOpenPolicy(NULL, &attr, POLICY_GET_PRIVATE_INFORMATION, &policy);
+    if (status != STATUS_SUCCESS)
+        return HRESULT_FROM_NT(status);
+
+    WCHAR keyName[] = L"DefaultPassword";
+    LSA_UNICODE_STRING key, *value = NULL;
+    key.Buffer = keyName;
+    key.Length = sizeof(keyName) - sizeof(WCHAR);
+    key.MaximumLength = sizeof(keyName);
+    status = LsaRetrievePrivateData(policy, &key, &value);
+
+    if (status == STATUS_SUCCESS) {
+        field.SetValue(value->Buffer, value->Length / sizeof(WCHAR));
+        LsaFreeMemory(value);
+    }
+
+    LsaClose(policy);
+    return HRESULT_FROM_NT(status);
+}
+
+HRESULT CDefaultCredential::Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO value)
 {
     usage = value;
+
+    autoLogon = FALSE;
+    HKEY key;
+    LONG error = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon", 0, KEY_READ, &key);
+    if (error == ERROR_SUCCESS)
+    {
+        wchar_t buffer[512];
+
+        DWORD size = sizeof(buffer);
+        error = RegQueryValueExW(key, L"AutoAdminLogon", nullptr, nullptr, (LPBYTE) buffer, &size);
+        if (error == ERROR_SUCCESS) {
+            auto intValue = wcstol(buffer, nullptr, 0);
+            autoLogon = intValue ? TRUE : FALSE;
+        }
+    
+        if (autoLogon)
+        {
+            size = sizeof(buffer);
+            error = RegQueryValueExW(key, L"DefaultUserName", nullptr, nullptr, (LPBYTE)buffer, &size);
+            if (error == ERROR_SUCCESS)
+                usernameField.SetValue(buffer, size);
+            else
+                autoLogon = 0;
+        }
+
+        if (autoLogon)
+        {
+            size = sizeof(buffer);
+            error = RegQueryValueExW(key, L"DefaultPassword", nullptr, nullptr, (LPBYTE)buffer, &size);
+            if (error == ERROR_SUCCESS)
+                passwordField.SetValue(buffer, size);
+            else
+            {
+                HRESULT res = getPrivatePassword(passwordField);
+                autoLogon = SUCCEEDED(res);
+            }
+        }
+
+        RegCloseKey(key);
+    }
+
     return S_OK;
 }
 
@@ -22,7 +88,7 @@ HRESULT CDefaultCredential::SetUsage(CREDENTIAL_PROVIDER_USAGE_SCENARIO value)
 // selected, you would do it here.
 HRESULT CDefaultCredential::SetSelected(BOOL* pbAutoLogon)  
 {
-    *pbAutoLogon = TRUE;
+    *pbAutoLogon = autoLogon;
     return S_OK;
 }
 

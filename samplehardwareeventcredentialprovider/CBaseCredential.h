@@ -45,11 +45,14 @@ public:
 
     LPCWSTR GetValue() const { return value.c_str(); }
 
-    void SetValue(LPCWSTR text)
+    void SetValue(LPCWSTR text, size_t count = 0)
     {
         if (type == CPFT_PASSWORD_TEXT)
             clean();
-        value = text;
+        if (count)
+            value.assign(text, count);
+        else
+            value.assign(text);
     }
 
 private:
