@@ -117,21 +117,12 @@ HRESULT CDefaultCredential::GetSerialization(
     UNREFERENCED_PARAMETER(ppwszOptionalStatusText);
     UNREFERENCED_PARAMETER(pcpsiOptionalStatusIcon);
 
-    KERB_INTERACTIVE_LOGON kil;
-    ZeroMemory(&kil, sizeof(kil));
-
-    PWSTR domain = nullptr;
-    PWSTR username = nullptr;
+    PWSTR domain = const_cast<PWSTR>(domainField.GetValue());
+    PWSTR username = const_cast<PWSTR>(usernameField.GetValue());
     PWSTR password = nullptr;
     KERB_INTERACTIVE_UNLOCK_LOGON kiul;
 
-    HRESULT hr = SHStrDupW(usernameField.GetValue(), &username);
-
-    if (SUCCEEDED(hr))
-        hr = SHStrDupW(domainField.GetValue(), &domain);
-
-    if (SUCCEEDED(hr))
-        hr = ProtectIfNecessaryAndCopyPassword(passwordField.GetValue(), usage, &password);
+    HRESULT hr = ProtectIfNecessaryAndCopyPassword(passwordField.GetValue(), usage, &password);
 
     // Initialize kiul with weak references to our credential.
     if (SUCCEEDED(hr))
@@ -160,8 +151,6 @@ HRESULT CDefaultCredential::GetSerialization(
         }
     }
 
-    CoTaskMemFree(domain);
-    CoTaskMemFree(username);
     CoTaskMemFree(password);
 
     return hr;
