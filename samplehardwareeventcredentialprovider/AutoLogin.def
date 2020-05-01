@@ -1,4 +1,4 @@
-LIBRARY SAMPLEHARDWAREEVENTCREDENTIALPROVIDER.DLL
+LIBRARY AutoLogin.dll
 
 EXPORTS
     DllCanUnloadNow                                 PRIVATE
