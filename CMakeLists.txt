@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.9)
 
 project(AutoLogin)
 
@@ -8,7 +8,7 @@ file(GLOB_RECURSE EXPORTS src/*.def)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS} ${EXPORTS})
 
-set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
+set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /ASSEMBLYMODULE:secur32.lib")
 
 target_link_libraries(${PROJECT_NAME}
