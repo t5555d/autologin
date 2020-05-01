@@ -78,14 +78,16 @@ STDAPI DllTest()
     DWORD authPackage = 0;
     LPVOID authBuffer;
     ULONG authBufferSize = 0;
-    CREDUI_INFO credUiInfo;
+    CREDUI_INFOW credUiInfo;
 
-    credUiInfo.pszCaptionText = TEXT("Test Credential Providers");
-    credUiInfo.pszMessageText = TEXT("Test Credential Providers");
+    credUiInfo.pszCaptionText = L"Test Credential Providers";
+    credUiInfo.pszMessageText = L"Test Credential Providers";
     credUiInfo.cbSize = sizeof(credUiInfo);
     credUiInfo.hbmBanner = NULL;
     credUiInfo.hwndParent = NULL;
 
-    DWORD error = CredUIPromptForWindowsCredentials(&credUiInfo, 0, &authPackage, NULL, 0, &authBuffer, &authBufferSize, &save, 0);
+    // I'm not sure why but it seems that CredUIPromptForWindowsCredentialsA 
+    // always return ERROR_GEN_FAILURE (0x1E). Only Unicode version works.
+    DWORD error = CredUIPromptForWindowsCredentialsW(&credUiInfo, 0, &authPackage, NULL, 0, &authBuffer, &authBufferSize, &save, 0);
     return HRESULT_FROM_WIN32(error);
 }

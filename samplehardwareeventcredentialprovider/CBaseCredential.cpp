@@ -91,8 +91,7 @@ HRESULT CBaseCredential::FormatStringValue(DWORD dwFieldID, PCWSTR format, ...)
 
     constexpr auto BUF_SIZE = 512;
     wchar_t value[BUF_SIZE];
-    wsprintf(value, format, va);
-    wvnsprintf(value, BUF_SIZE, format, va);
+    vswprintf(value, BUF_SIZE, format, va);
     va_end(va);
 
     string->SetValue(value);

@@ -115,7 +115,7 @@ HRESULT UnicodeStringInitWithString(
     HRESULT hr;
     if (pwz)
     {
-        size_t lenString = lstrlen(pwz);
+        size_t lenString = lstrlenW(pwz);
         USHORT usCharCount;
         hr = SizeTToUShort(lenString, &usCharCount);
         if (SUCCEEDED(hr))
@@ -625,8 +625,8 @@ HRESULT DomainUsernameStringAlloc(
     )
 {
     HRESULT hr;
-    size_t cchDomain = lstrlen(pwszDomain);
-    size_t cchUsername = lstrlen(pwszUsername);
+    size_t cchDomain = lstrlenW(pwszDomain);
+    size_t cchUsername = lstrlenW(pwszUsername);
     // Length of domain, 1 character for '\', length of Username, plus null terminator. 
     size_t cbLen = sizeof(WCHAR) * (cchDomain + 1 + cchUsername +1);
     PWSTR pwszDest = (PWSTR)HeapAlloc(GetProcessHeap(), 0, cbLen);

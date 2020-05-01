@@ -68,7 +68,7 @@ class BitmapField : public Field
 public:
     static constexpr TYPE REQUIRED_TYPE = CPFT_TILE_IMAGE;
 
-    BitmapField(DWORD id, LPCWSTR bitmapName, PLACE place = DEFAULT_PLACE, STATE state = DEFAULT_STATE) :
+    BitmapField(DWORD id, LPCTSTR bitmapName, PLACE place = DEFAULT_PLACE, STATE state = DEFAULT_STATE) :
         Field(id, REQUIRED_TYPE, place, state)
     {
         value = (HBITMAP) LoadImage(g_instance, bitmapName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_SHARED | LR_LOADTRANSPARENT);
