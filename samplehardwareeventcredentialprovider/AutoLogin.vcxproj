@@ -93,13 +93,13 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>secur32.lib;shlwapi.lib;gdi32.lib;ole32.lib;user32.lib;advapi32.lib;credui.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>secur32.lib;shlwapi.lib;gdi32.lib;ole32.lib;user32.lib;advapi32.lib;credui.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>LinkVerboseLib</ShowProgress>
       <AdditionalLibraryDirectories>C:\program Files\microsoft sdKs\Windows\v1.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>SampleHardwareEventCredentialProvider.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>AutoLogin.def</ModuleDefinitionFile>
       <AddModuleNamesToAssembly>secur32.lib;%(AddModuleNamesToAssembly)</AddModuleNamesToAssembly>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
@@ -121,11 +121,11 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>secur32.lib;shlwapi.lib;gdi32.lib;ole32.lib;user32.lib;advapi32.lib;credui.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>secur32.lib;shlwapi.lib;gdi32.lib;ole32.lib;user32.lib;advapi32.lib;credui.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>LinkVerboseLib</ShowProgress>
-      <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>C:\program Files\microsoft sdKs\Windows\v1.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>samplehardwareeventcredentialprovider.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>AutoLogin.def</ModuleDefinitionFile>
       <AddModuleNamesToAssembly>secur32.lib;%(AddModuleNamesToAssembly)</AddModuleNamesToAssembly>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -142,6 +142,7 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <AdditionalDependencies>secur32.lib;shlwapi.lib;gdi32.lib;ole32.lib;user32.lib;advapi32.lib;credui.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -171,11 +172,11 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>secur32.lib;shlwapi.lib;gdi32.lib;ole32.lib;user32.lib;advapi32.lib;credui.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>secur32.lib;shlwapi.lib;gdi32.lib;ole32.lib;user32.lib;advapi32.lib;credui.lib;ws2_32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>LinkVerboseLib</ShowProgress>
-      <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>C:\program Files\microsoft sdKs\Windows\v1.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>samplehardwareeventcredentialprovider.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>AutoLogin.def</ModuleDefinitionFile>
       <AddModuleNamesToAssembly>secur32.lib;%(AddModuleNamesToAssembly)</AddModuleNamesToAssembly>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX64</TargetMachine>

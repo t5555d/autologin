@@ -25,7 +25,7 @@ class CClassFactory : public CUnknown<IClassFactory>
 {
 public: // IClassFactory
 
-    HRESULT CreateInstance(IUnknown* pUnkOuter, REFIID riid, void **ppv) override
+    HRESULT STDCALL CreateInstance(IUnknown* pUnkOuter, REFIID riid, void **ppv) override
     {
         if (!pUnkOuter)
         {
@@ -38,7 +38,7 @@ public: // IClassFactory
         }
     }
 
-    HRESULT LockServer(BOOL bLock) override
+    HRESULT STDCALL LockServer(BOOL bLock) override
     {
         bLock ? DllAddRef() : DllRelease();
         return S_OK;

@@ -5,6 +5,7 @@
 #include <shlwapi.h>
 
 #define NOT_IMPLEMENTED override { return E_NOTIMPL; }
+#define STDCALL STDMETHODCALLTYPE
 
 extern HINSTANCE g_instance;
 
@@ -16,12 +17,12 @@ class CUnknown : public Base // Base should inherit from IUnknown
 {
 public: // IUnknown
 
-    ULONG AddRef() override
+    ULONG STDCALL AddRef() override
     {
         return ++_cRef;
     }
 
-    ULONG Release() override
+    ULONG STDCALL Release() override
     {
         auto cRef = --_cRef;
         if (!cRef)
@@ -29,7 +30,7 @@ public: // IUnknown
         return cRef;
     }
 
-    HRESULT QueryInterface(REFIID riid, void** ppv) override
+    HRESULT STDCALL QueryInterface(REFIID riid, void** ppv) override
     {
         static const QITAB qit[] =
         {

@@ -84,41 +84,39 @@ class CBaseCredential : public CUnknown<ICredentialProviderCredential>
 {
 public: // ICredentialProviderCredential default implementation for all field-related methods
 
-    HRESULT GetFieldState(DWORD dwFieldID,
+    HRESULT STDCALL GetFieldState(DWORD dwFieldID,
         CREDENTIAL_PROVIDER_FIELD_STATE* pcpfs,
         CREDENTIAL_PROVIDER_FIELD_INTERACTIVE_STATE* pcpfis) override;
 
-    HRESULT GetStringValue(DWORD, PWSTR*) override;
-    HRESULT SetStringValue(DWORD, PCWSTR) override;
-
-    HRESULT FormatStringValue(DWORD dwFieldId, PCWSTR fmt, ...);
-
-    HRESULT GetBitmapValue(DWORD, HBITMAP*) override;
-
-    HRESULT GetCheckboxValue(DWORD, BOOL*, PWSTR*) NOT_IMPLEMENTED;
-    HRESULT GetComboBoxValueCount(DWORD, DWORD*, DWORD*) NOT_IMPLEMENTED;
-    HRESULT GetComboBoxValueAt(DWORD, DWORD, PWSTR*) NOT_IMPLEMENTED;
-    HRESULT GetSubmitButtonValue(DWORD, DWORD*) NOT_IMPLEMENTED;
-    HRESULT SetCheckboxValue(DWORD, BOOL) NOT_IMPLEMENTED;
-    HRESULT SetComboBoxSelectedValue(DWORD, DWORD) NOT_IMPLEMENTED;
-    HRESULT CommandLinkClicked(DWORD) NOT_IMPLEMENTED;
+    HRESULT STDCALL GetStringValue(DWORD, PWSTR*) override;
+    HRESULT STDCALL SetStringValue(DWORD, PCWSTR) override;
+    HRESULT STDCALL GetBitmapValue(DWORD, HBITMAP*) override;
+    HRESULT STDCALL GetCheckboxValue(DWORD, BOOL*, PWSTR*) NOT_IMPLEMENTED;
+    HRESULT STDCALL GetComboBoxValueCount(DWORD, DWORD*, DWORD*) NOT_IMPLEMENTED;
+    HRESULT STDCALL GetComboBoxValueAt(DWORD, DWORD, PWSTR*) NOT_IMPLEMENTED;
+    HRESULT STDCALL GetSubmitButtonValue(DWORD, DWORD*) NOT_IMPLEMENTED;
+    HRESULT STDCALL SetCheckboxValue(DWORD, BOOL) NOT_IMPLEMENTED;
+    HRESULT STDCALL SetComboBoxSelectedValue(DWORD, DWORD) NOT_IMPLEMENTED;
+    HRESULT STDCALL CommandLinkClicked(DWORD) NOT_IMPLEMENTED;
 
 public: // ICredentialProviderCredential default implementation for other optional methods
 
-    HRESULT Advise(ICredentialProviderCredentialEvents*) NOT_IMPLEMENTED;
-    HRESULT UnAdvise() NOT_IMPLEMENTED;
+    HRESULT STDCALL Advise(ICredentialProviderCredentialEvents*) NOT_IMPLEMENTED;
+    HRESULT STDCALL UnAdvise() NOT_IMPLEMENTED;
 
-    HRESULT SetSelected(BOOL*) { return S_FALSE; }
-    HRESULT SetDeselected() { return S_OK; }
+    HRESULT STDCALL SetSelected(BOOL*) { return S_FALSE; }
+    HRESULT STDCALL SetDeselected() { return S_OK; }
 
-    HRESULT ReportResult(NTSTATUS, NTSTATUS, PWSTR*,
+    HRESULT STDCALL ReportResult(NTSTATUS, NTSTATUS, PWSTR*,
         CREDENTIAL_PROVIDER_STATUS_ICON*) NOT_IMPLEMENTED;
 
 public:
 
     HRESULT GetFieldDescriptorAt(DWORD dwIndex, CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** desc);
     HRESULT GetFieldDescriptorCount(DWORD* pdwCount);
-    
+
+    HRESULT FormatStringValue(DWORD dwFieldId, PCWSTR fmt, ...);
+
 protected:
     void registerField(Field& field)
     {

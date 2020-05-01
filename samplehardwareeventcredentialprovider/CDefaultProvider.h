@@ -13,17 +13,14 @@ class CDefaultProvider : public CUnknown<ICredentialProvider>
 {
 public: // ICredentialProvider
 
-    HRESULT SetUsageScenario(CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus, DWORD dwFlags) override;
-    HRESULT SetSerialization(const CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION *) NOT_IMPLEMENTED;
-
-    HRESULT Advise(ICredentialProviderEvents* pcpe, UINT_PTR upAdviseContext) override;
-    HRESULT UnAdvise() override;
-
-    HRESULT GetFieldDescriptorCount(DWORD* pdwCount) override;
-    HRESULT GetFieldDescriptorAt(DWORD dwIndex, CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** ppcpfd) override;
-
-    HRESULT GetCredentialCount(DWORD* pdwCount, DWORD* pdwDefault, BOOL* pbAutoLogonWithDefault) override;
-    HRESULT GetCredentialAt(DWORD dwIndex, ICredentialProviderCredential** ppcpc) override;
+    HRESULT STDCALL SetUsageScenario(CREDENTIAL_PROVIDER_USAGE_SCENARIO cpus, DWORD dwFlags) override;
+    HRESULT STDCALL SetSerialization(const CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION *) NOT_IMPLEMENTED;
+    HRESULT STDCALL Advise(ICredentialProviderEvents* pcpe, UINT_PTR upAdviseContext) override;
+    HRESULT STDCALL UnAdvise() override;
+    HRESULT STDCALL GetFieldDescriptorCount(DWORD* pdwCount) override;
+    HRESULT STDCALL GetFieldDescriptorAt(DWORD dwIndex, CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** ppcpfd) override;
+    HRESULT STDCALL GetCredentialCount(DWORD* pdwCount, DWORD* pdwDefault, BOOL* pbAutoLogonWithDefault) override;
+    HRESULT STDCALL GetCredentialAt(DWORD dwIndex, ICredentialProviderCredential** ppcpc) override;
 
     static const GUID CLSID;
 

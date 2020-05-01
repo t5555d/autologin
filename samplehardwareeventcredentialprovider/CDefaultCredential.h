@@ -16,13 +16,13 @@ class CDefaultCredential : public CBaseCredential
 {
 public: // ICredentialProviderCredential
 
-    HRESULT SetSelected(BOOL* pbAutoLogon) override;
+    HRESULT STDCALL SetSelected(BOOL* pbAutoLogon) override;
 
-    HRESULT GetSerialization(CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr, 
+    HRESULT STDCALL GetSerialization(CREDENTIAL_PROVIDER_GET_SERIALIZATION_RESPONSE* pcpgsr,
                                     CREDENTIAL_PROVIDER_CREDENTIAL_SERIALIZATION* pcpcs, 
                                     PWSTR* ppwszOptionalStatusText, 
                                     CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon) override;
-    HRESULT ReportResult(NTSTATUS ntsStatus, 
+    HRESULT STDCALL ReportResult(NTSTATUS ntsStatus,
                                 NTSTATUS ntsSubstatus,
                                 PWSTR* ppwszOptionalStatusText, 
                                 CREDENTIAL_PROVIDER_STATUS_ICON* pcpsiOptionalStatusIcon) override;
