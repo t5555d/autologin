@@ -5,6 +5,7 @@
 enum AUTO_FIELD_ID
 {
     AUTO_TITLE,
+    AUTO_DOMAIN,
     AUTO_USERNAME,
     AUTO_PASSWORD
 };
@@ -29,6 +30,7 @@ public:
     CDefaultCredential()
     {
         registerField(titleField);
+        registerField(domainField);
         registerField(usernameField);
         registerField(passwordField);
     }
@@ -42,6 +44,7 @@ private:
 
     BOOL        autoLogon = FALSE;
     StringField titleField{ AUTO_TITLE, CPFT_SMALL_TEXT, CPFS_DISPLAY_IN_BOTH, CPFIS_NONE };
-    StringField usernameField{ AUTO_USERNAME, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_NONE };
-    StringField passwordField{ AUTO_PASSWORD, CPFT_PASSWORD_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_FOCUSED };
+    StringField domainField{ AUTO_DOMAIN, CPFT_EDIT_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_NONE, L"Domain Name" };
+    StringField usernameField{ AUTO_USERNAME, CPFT_EDIT_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_NONE, L"User Name" };
+    StringField passwordField{ AUTO_PASSWORD, CPFT_PASSWORD_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_FOCUSED, L"Password" };
 };

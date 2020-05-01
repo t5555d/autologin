@@ -39,7 +39,7 @@ HRESULT CDefaultCredential::Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO value)
 
     autoLogon = FALSE;
     HKEY key;
-    LONG error = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon", 0, KEY_READ, &key);
+    LSTATUS error = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon", 0, KEY_READ, &key);
     if (error == ERROR_SUCCESS)
     {
         wchar_t buffer[512];
@@ -51,17 +51,30 @@ HRESULT CDefaultCredential::Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO value)
             autoLogon = intValue ? TRUE : FALSE;
         }
     
-        if (autoLogon)
+        //if (autoLogon)
+        {
+            size = sizeof(buffer);
+            error = RegQueryValueExW(key, L"DefaultDomainName", nullptr, nullptr, (LPBYTE)buffer, &size);
+            if (error != ERROR_SUCCESS)
+                error = GetComputerNameW(buffer, &size) ? ERROR_SUCCESS : GetLastError();
+
+            if (error == ERROR_SUCCESS)
+                domainField.SetValue(buffer, size);
+            else
+                autoLogon = FALSE;
+        }
+
+        //if (autoLogon)
         {
             size = sizeof(buffer);
             error = RegQueryValueExW(key, L"DefaultUserName", nullptr, nullptr, (LPBYTE)buffer, &size);
             if (error == ERROR_SUCCESS)
                 usernameField.SetValue(buffer, size);
             else
-                autoLogon = 0;
+                autoLogon = FALSE;
         }
 
-        if (autoLogon)
+        //if (autoLogon)
         {
             size = sizeof(buffer);
             error = RegQueryValueExW(key, L"DefaultPassword", nullptr, nullptr, (LPBYTE)buffer, &size);
@@ -70,7 +83,8 @@ HRESULT CDefaultCredential::Initialize(CREDENTIAL_PROVIDER_USAGE_SCENARIO value)
             else
             {
                 HRESULT res = getPrivatePassword(passwordField);
-                autoLogon = SUCCEEDED(res);
+                if (FAILED(res))
+                    autoLogon = FALSE;
             }
         }
 
@@ -106,19 +120,15 @@ HRESULT CDefaultCredential::GetSerialization(
     KERB_INTERACTIVE_LOGON kil;
     ZeroMemory(&kil, sizeof(kil));
 
-    WCHAR domain[MAX_COMPUTERNAME_LENGTH+1];
-    DWORD cch = ARRAYSIZE(domain);
-    if (!GetComputerNameW(domain, &cch))
-    {
-        DWORD dwErr = GetLastError();
-        return HRESULT_FROM_WIN32(dwErr);
-    }
-
+    PWSTR domain = nullptr;
     PWSTR username = nullptr;
     PWSTR password = nullptr;
     KERB_INTERACTIVE_UNLOCK_LOGON kiul;
 
     HRESULT hr = SHStrDupW(usernameField.GetValue(), &username);
+
+    if (SUCCEEDED(hr))
+        hr = SHStrDupW(domainField.GetValue(), &domain);
 
     if (SUCCEEDED(hr))
         hr = ProtectIfNecessaryAndCopyPassword(passwordField.GetValue(), usage, &password);
@@ -150,6 +160,7 @@ HRESULT CDefaultCredential::GetSerialization(
         }
     }
 
+    CoTaskMemFree(domain);
     CoTaskMemFree(username);
     CoTaskMemFree(password);
 

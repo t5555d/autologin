@@ -25,6 +25,7 @@ HRESULT CBaseCredential::GetFieldDescriptorAt(
     CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR desc = { 0 };
     desc.dwFieldID = field->GetID();
     desc.cpft = field->GetType();
+    SHStrDupW(field->GetLabel(), &desc.pszLabel);
 
     return FieldDescriptorCoAllocCopy(desc, pdesc);
 }

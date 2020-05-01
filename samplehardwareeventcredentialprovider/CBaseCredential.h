@@ -20,17 +20,19 @@ public:
     TYPE    GetType() const { return type; }
     PLACE   GetPlace() const { return place; }
     STATE   GetState() const { return state; }
+    LPCWSTR GetLabel() const { return label; }
 
 protected:
 
-    Field(DWORD id, TYPE type, PLACE place = DEFAULT_PLACE, STATE state = DEFAULT_STATE) :
-        id(id), type(type), place(place), state(state) {}
+    Field(DWORD id, TYPE type, PLACE place = DEFAULT_PLACE, STATE state = DEFAULT_STATE, LPCWSTR label = nullptr) :
+        id(id), type(type), place(place), state(state), label(label) {}
     virtual ~Field() {}
 
     const DWORD     id;
     const TYPE      type;
     PLACE           place;
     STATE           state;
+    LPCWSTR         label;
 };
 
 class StringField : public Field
@@ -39,8 +41,8 @@ public:
 
     static constexpr TYPE DEFAULT_TYPE = CPFT_LARGE_TEXT;
 
-    StringField(DWORD id, TYPE type = DEFAULT_TYPE, PLACE place = DEFAULT_PLACE, STATE state = DEFAULT_STATE) :
-        Field(id, type, place, state) {}
+    StringField(DWORD id, TYPE type = DEFAULT_TYPE, PLACE place = DEFAULT_PLACE, STATE state = DEFAULT_STATE, LPCWSTR label = nullptr) :
+        Field(id, type, place, state, label) {}
     ~StringField() { clean(); }
 
     LPCWSTR GetValue() const { return value.c_str(); }

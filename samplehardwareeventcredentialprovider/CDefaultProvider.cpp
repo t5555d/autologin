@@ -25,7 +25,7 @@ void CDefaultProvider::cleanup()
 void CDefaultProvider::OnConnectStatusChanged()
 {
     if (!defaultCredential->isAutoLogonEnabled())
-        messageCredential->SetStringValue(MSG_MESSAGE, L"Auto-login is disabled in registry");
+        messageCredential->SetStringValue(MSG_MESSAGE, L"Auto-login is disabled in system settings");
     else if (rdpState.isActive())
         messageCredential->FormatStringValue(MSG_MESSAGE, L"Auto-login is off, due to active RDP connection with %S", rdpState.getPeerText());
     else
@@ -94,6 +94,7 @@ HRESULT CDefaultProvider::SetUsageScenario(
         {
             rdpState.setCallback(OnConnectStatusChanged, this);
             rdpState.start();
+            OnConnectStatusChanged();
         }
     }
     catch (const std::bad_alloc&)
@@ -109,10 +110,7 @@ HRESULT CDefaultProvider::SetUsageScenario(
 
 // Called by LogonUI to give you a callback. Providers often use the callback if they
 // some event would cause them to need to change the set of tiles that they enumerated
-HRESULT CDefaultProvider::Advise(
-    ICredentialProviderEvents* pcpe,
-    UINT_PTR upAdviseContext
-    )
+HRESULT CDefaultProvider::Advise(ICredentialProviderEvents* pcpe, UINT_PTR upAdviseContext)
 {
     UnAdvise();
     events = pcpe;
