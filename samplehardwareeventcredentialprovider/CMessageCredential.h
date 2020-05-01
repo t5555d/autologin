@@ -1,9 +1,11 @@
 #pragma once
 
 #include "CBaseCredential.h"
+#include "resource.h"
 
 enum MESSAGE_FIELD_ID
 {
+    MSG_IMAGE,
     MSG_TITLE,
     MSG_MESSAGE
 };
@@ -20,12 +22,14 @@ public:
 
     CMessageCredential()
     {
+        registerField(imageField);
         registerField(titleField);
         registerField(messageField);
     }
 
 private:
 
+    BitmapField imageField{ MSG_IMAGE, MAKEINTRESOURCE(IDB_CLOSED), CPFS_DISPLAY_IN_BOTH };
     StringField titleField{ MSG_TITLE, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_BOTH };
     StringField messageField{ MSG_MESSAGE, CPFT_LARGE_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE };
 };

@@ -98,3 +98,17 @@ HRESULT CBaseCredential::FormatStringValue(DWORD dwFieldID, PCWSTR format, ...)
     string->SetValue(value);
     return S_OK;
 }
+
+HRESULT CBaseCredential::GetBitmapValue(DWORD dwFieldID, HBITMAP* phbmp)
+{
+    auto field = getField(dwFieldID);
+    if (!field || !phbmp)
+        return E_INVALIDARG;
+
+    auto bitmap = dynamic_cast<BitmapField *>(field);
+    if (!bitmap)
+        return E_NOINTERFACE;
+
+    *phbmp = bitmap->GetValue();
+    return S_OK;
+}

@@ -6,6 +6,8 @@
 
 #define NOT_IMPLEMENTED override { return E_NOTIMPL; }
 
+extern HINSTANCE g_instance;
+
 void DllAddRef();
 void DllRelease();
 

@@ -3,6 +3,7 @@
 #include "CUnknown.h"
 #include "CDefaultProvider.h"
 
+HINSTANCE g_instance;
 static LONG g_cRef = 0;   // global dll reference count
 
 void DllAddRef()
@@ -67,6 +68,7 @@ STDAPI_(BOOL) DllMain(HINSTANCE hinstDll, DWORD dwReason, void *)
         break;
     }
     
+    g_instance = hinstDll;
     return TRUE;
 }
 

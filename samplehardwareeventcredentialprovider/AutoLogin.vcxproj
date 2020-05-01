@@ -197,11 +197,18 @@
     <ClInclude Include="helpers.h" />
     <ClInclude Include="CMessageCredential.h" />
     <ClInclude Include="RDPState.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Register.reg" />
     <None Include="AutoLogin.def" />
     <None Include="Unregister.reg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="entry.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resources.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

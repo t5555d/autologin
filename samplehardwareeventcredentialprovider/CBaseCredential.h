@@ -63,6 +63,23 @@ private:
     void clean();
 };
 
+class BitmapField : public Field
+{
+public:
+    static constexpr TYPE REQUIRED_TYPE = CPFT_TILE_IMAGE;
+
+    BitmapField(DWORD id, LPCWSTR bitmapName, PLACE place = DEFAULT_PLACE, STATE state = DEFAULT_STATE) :
+        Field(id, REQUIRED_TYPE, place, state)
+    {
+        value = (HBITMAP) LoadImage(g_instance, bitmapName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_SHARED | LR_LOADTRANSPARENT);
+    }
+
+    HBITMAP GetValue() const { return value; }
+
+private:
+    HBITMAP value;
+};
+
 class CBaseCredential : public CUnknown<ICredentialProviderCredential>
 {
 public: // ICredentialProviderCredential default implementation for all field-related methods
@@ -76,7 +93,8 @@ public: // ICredentialProviderCredential default implementation for all field-re
 
     HRESULT FormatStringValue(DWORD dwFieldId, PCWSTR fmt, ...);
 
-    HRESULT GetBitmapValue(DWORD, HBITMAP*) NOT_IMPLEMENTED;
+    HRESULT GetBitmapValue(DWORD, HBITMAP*) override;
+
     HRESULT GetCheckboxValue(DWORD, BOOL*, PWSTR*) NOT_IMPLEMENTED;
     HRESULT GetComboBoxValueCount(DWORD, DWORD*, DWORD*) NOT_IMPLEMENTED;
     HRESULT GetComboBoxValueAt(DWORD, DWORD, PWSTR*) NOT_IMPLEMENTED;

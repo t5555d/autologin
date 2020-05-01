@@ -1,0 +1,3 @@
+#include "resource.h"
+IDB_OPENED     BITMAP      DISCARDABLE "opened.bmp" 
+IDB_CLOSED     BITMAP      DISCARDABLE "closed.bmp" 

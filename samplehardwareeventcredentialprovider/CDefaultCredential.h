@@ -1,9 +1,11 @@
 #pragma once
 
 #include "CBaseCredential.h"
+#include "resource.h"
 
 enum AUTO_FIELD_ID
 {
+    AUTO_IMAGE,
     AUTO_TITLE,
     AUTO_DOMAIN,
     AUTO_USERNAME,
@@ -29,6 +31,7 @@ public:
 
     CDefaultCredential()
     {
+        registerField(imageField);
         registerField(titleField);
         registerField(domainField);
         registerField(usernameField);
@@ -43,6 +46,7 @@ private:
     CREDENTIAL_PROVIDER_USAGE_SCENARIO usage; // The usage scenario for which we were enumerated.
 
     BOOL        autoLogon = FALSE;
+    BitmapField imageField{ AUTO_IMAGE, MAKEINTRESOURCE(IDB_OPENED), CPFS_DISPLAY_IN_BOTH };
     StringField titleField{ AUTO_TITLE, CPFT_SMALL_TEXT, CPFS_DISPLAY_IN_BOTH, CPFIS_NONE };
     StringField domainField{ AUTO_DOMAIN, CPFT_EDIT_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_NONE, L"Domain Name" };
     StringField usernameField{ AUTO_USERNAME, CPFT_EDIT_TEXT, CPFS_DISPLAY_IN_SELECTED_TILE, CPFIS_NONE, L"User Name" };
